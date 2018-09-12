@@ -1,0 +1,6 @@
+---
+applications:
+- name: articulate-dot-net
+buildpack: https://github.com/cloudfoundry/dotnet-core-buildpack
+services:
+- articulateMySqlDb

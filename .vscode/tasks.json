@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/pcf-ers-dotnetcore-demo.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
