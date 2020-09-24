@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Steeltoe.CloudFoundry.Connector;
@@ -38,7 +40,6 @@ namespace Articulate.Controllers
         private readonly AttendeeContext _db;
         private readonly ILogger<HomeController> _log;
         private IOptionsSnapshot<CloudFoundryApplicationOptions> _app;
-
         public HomeController(AttendeeContext db, ILogger<HomeController> log, IOptionsSnapshot<CloudFoundryApplicationOptions> app)
         {
             _db = db;
@@ -175,6 +176,14 @@ namespace Articulate.Controllers
                 options.Value.Application_Name, 
                 options.Value.InstanceIndex.ToString()
             };
+        }
+
+        [Route("/config")]
+        public IActionResult Config([FromServices]IOptionsSnapshot<CloudFoundryApplicationOptions> options)
+        {
+            var envDict = Environment.GetEnvironmentVariables();
+            var envVars = envDict.Keys.Cast<string>().Select(x => (x, envDict[x]?.ToString()));
+            return View(envVars);
         }
     }
 }

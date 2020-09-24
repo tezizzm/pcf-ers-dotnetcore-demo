@@ -1,0 +1,25 @@
+@model IEnumerable<(string Key, string Value)>
+
+<div class="container" role="main">
+
+	<span id="tutorialName" style="display: none;">basics</span>
+
+	<div class="page-header">
+		<p>&nbsp;</p>
+		<h1>Configuration</h1>
+	</div>
+
+	<div class="row">
+		<div class="col-md-12">
+			<dl>
+				@foreach (var (key, value) in Model)
+				{
+					<dt>@key</dt>
+					<dd>@value</dd>
+				}
+			</dl>
+		</div>
+
+	</div>
+	
+</div>
