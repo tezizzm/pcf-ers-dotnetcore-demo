@@ -30,6 +30,7 @@ using Steeltoe.Connector.SqlServer.EFCore;
 using Steeltoe.Management.Endpoint.SpringBootAdminClient;
 using Steeltoe.Management.TaskCore;
 using Steeltoe.Security.Authentication.CloudFoundry;
+using Articulate.Extensions;
 
 namespace Articulate
 {
@@ -90,6 +91,8 @@ namespace Articulate
                 .AddPolicy(SecurityPolicy.LoggedIn, policy => policy
                     .AddAuthenticationSchemes(CloudFoundryDefaults.AuthenticationScheme)
                     .RequireAuthenticatedUser()));
+
+            services.AddWavefrontProxy(Configuration);
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
         }

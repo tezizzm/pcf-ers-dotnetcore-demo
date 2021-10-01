@@ -10,16 +10,16 @@
     <ConfigDir>..\config</ConfigDir>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GitInfo" Version="2.0.31" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.5">
+    <PackageReference Include="GitInfo" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.10" />
     <PackageReference Include="Steeltoe.Discovery.ClientCore" Version="3.0.2" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.0-alpha.2" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.1" />
     <PackageReference Include="Steeltoe.Connector.EFCore" Version="3.0.2" />
     <PackageReference Include="Steeltoe.Connector.ConnectorCore" Version="3.0.2" />
     <PackageReference Include="Steeltoe.Connector.CloudFoundry" Version="3.0.2" />
@@ -32,6 +32,7 @@
     <PackageReference Include="Steeltoe.Management.TaskCore" Version="3.0.2" />
     <PackageReference Include="Steeltoe.Management.TracingCore" Version="3.0.2" />
     <PackageReference Include="Steeltoe.Security.Authentication.CloudFoundryCore" Version="3.0.2" />
+    <PackageReference Include="Wavefront.AspNetCore.SDK.CSharp" Version="1.4.0" />
   </ItemGroup>
   <ItemGroup>
     <None Include="git.properties">
