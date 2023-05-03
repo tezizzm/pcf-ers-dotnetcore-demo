@@ -16,6 +16,7 @@ using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.Git;
 using Nuke.Common.Tools.GitHub;
 using Nuke.Common.Tools.GitVersion;
+using Nuke.Common.Tools.NerdbankGitVersioning;
 using Nuke.Common.Utilities.Collections;
 using Octokit;
 using Serilog;
@@ -27,7 +28,6 @@ using static Nuke.Common.Tools.CloudFoundry.CloudFoundryTasks;
 // ReSharper disable TemplateIsNotCompileTimeConstantProblem
 
 
-[CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
 //[AzureDevopsConfigurationGenerator(
 //    VcsTriggeredTargets = new[]{"Pack"}
@@ -57,7 +57,7 @@ partial class Build : NukeBuild
     [GitRepository] GitRepository GitRepository;
 //    [GitVersion] public GitVersion GitVersion { get; set; }
 
-    [GitVersion(Framework = "net6.0")] readonly GitVersion GitVersion;
+    [NerdbankGitVersioning] readonly NerdbankGitVersioning GitVersion;
     [Parameter("Cloud Foundry Username")]
     readonly string CfUsername;
     [Parameter("Cloud Foundry Password")]
@@ -90,7 +90,7 @@ partial class Build : NukeBuild
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
     AbsolutePath PublishDirectory => RootDirectory / "src" / "bin" / Configuration / Framework / Runtime  / "publish";
-    string PackageZipName => $"articulate-{GitVersion.MajorMinorPatch}.zip";
+    string PackageZipName => $"articulate-{GitVersion.SemVer2}.zip";
 
     AppDeployment[] Apps;
     AppDeployment Green, Blue, Backend;
@@ -121,9 +121,9 @@ partial class Build : NukeBuild
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-                .SetAssemblyVersion(GitVersion.AssemblySemVer)
-                .SetFileVersion(GitVersion.AssemblySemFileVer)
-                .SetInformationalVersion(GitVersion.InformationalVersion)
+                .SetAssemblyVersion(GitVersion.AssemblyVersion)
+                .SetFileVersion(GitVersion.AssemblyFileVersion)
+                .SetInformationalVersion(GitVersion.AssemblyInformationalVersion)
                 .EnableNoRestore());
         });
 
@@ -136,9 +136,9 @@ partial class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .SetRuntime("linux-x64")
                 .DisableSelfContained()
-                .SetAssemblyVersion(GitVersion.AssemblySemVer)
-                .SetFileVersion(GitVersion.AssemblySemFileVer)
-                .SetInformationalVersion(GitVersion.InformationalVersion));
+                .SetAssemblyVersion(GitVersion.AssemblyVersion)
+                .SetFileVersion(GitVersion.AssemblyFileVersion)
+                .SetInformationalVersion(GitVersion.AssemblyInformationalVersion));
         });
 
     Target Pack => _ => _
@@ -446,7 +446,7 @@ partial class Build : NukeBuild
             var owner = gitIdParts[0];
             var repoName = gitIdParts[1];
             
-            var releaseName = $"v{GitVersion.MajorMinorPatch}";
+            var releaseName = $"v{GitVersion.SemVer2}";
             Release release;
             try
             {

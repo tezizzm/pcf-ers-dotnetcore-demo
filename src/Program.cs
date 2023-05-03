@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
+using Microsoft.Azure.SpringCloud.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration.Memory;
 using Microsoft.Extensions.Options;
@@ -40,7 +41,8 @@ using Steeltoe.Extensions.Configuration.ConfigServer;
 using LocalCertificateWriter = Articulate.LocalCerts.LocalCertificateWriter;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.UseCloudFoundryCertificateForInternalRoutes();    
+builder.UseCloudFoundryCertificateForInternalRoutes();
+builder.WebHost.UseAzureSpringCloudService();
 // when running locally, get config from <gitroot>/config folder
 // string configDir = "../config/";
 // var appName = typeof(Program).Assembly.GetName().Name;
