@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration.Memory;
 using Microsoft.Extensions.Options;
+using Steeltoe.Common;
 using Steeltoe.Common.Hosting;
 using Steeltoe.Common.Http;
 using Steeltoe.Common.Http.Discovery;
@@ -60,8 +61,13 @@ if (builder.Environment.IsDevelopment())
     builder.UseDevCertificate();
 }
 
+if (Platform.IsCloudFoundry)
+{
+    builder.Configuration
+        .AddCloudFoundryContainerIdentity();
+}
+
 builder.Configuration
-    .AddCloudFoundryContainerIdentity()
     .AddEnvironmentVariables()
     .AddCommandLine(args)
     .AddInMemoryCollection(new Dictionary<string, string>
