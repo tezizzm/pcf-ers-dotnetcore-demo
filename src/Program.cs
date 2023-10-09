@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 using Articulate;
 using Articulate.Models;
 using Articulate.Repositories;
+using Articulate.Workaround;
+using Articulate.Workaround.AzureSpringApps;
+using Articulate.Workaround.Config.Properties;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Connections;
@@ -40,50 +43,123 @@ using Steeltoe.Discovery.Eureka;
 using Steeltoe.Extensions.Configuration.ConfigServer;
 using LocalCertificateWriter = Articulate.LocalCerts.LocalCertificateWriter;
 
+var logger = LoggerFactory.Create(c => c
+    .AddSimpleConsole(f => f
+        .SingleLine = true))
+    .CreateLogger<Program>();
 var builder = WebApplication.CreateBuilder(args);
 builder.UseCloudFoundryCertificateForInternalRoutes();
 builder.WebHost.UseAzureSpringCloudService();
 // when running locally, get config from <gitroot>/config folder
 // string configDir = "../config/";
 // var appName = typeof(Program).Assembly.GetName().Name;
-Hotfix.Apply();
 builder.Configuration
     .AddYamlFile("appsettings.yaml", false, true)
     .AddYamlFile($"appsettings.{builder.Environment.EnvironmentName}.yaml", true, true)
     .AddProfiles()
     .AddEnvironmentVariables()
-    .AddCommandLine(args)
-    .AddCloudFoundry()
-    .AddConfigServer()
-    .AddProfiles()
-    .AddEnvironmentVariables();
+    .AddCommandLine(args);
 
-if (builder.Environment.IsDevelopment())
-{
-    builder.UseDevCertificate();
-}
 
 if (Platform.IsCloudFoundry)
 {
     builder.Configuration
+        .AddCloudFoundry()
         .AddCloudFoundryContainerIdentity();
+    if (builder.Environment.IsDevelopment())
+    {
+        builder.UseDevCertificate();
+    }
 }
 
+if (Platform2.IsAzureSpringApps)
+{
+    builder.Configuration.AddAzureConfiguration();
+
+    var certPath = Regex.Replace(Environment.GetEnvironmentVariable("eureka_client_tls_keystore"), "^file://", "");
+    builder.Configuration.AddCertificateFile(certPath);
+    var certificateSource = (builder.Configuration as IConfigurationBuilder).Sources.FirstOrDefault(cSource => cSource is ICertificateSource);
+    if (certificateSource != null)
+    {
+        var certConfigurer =
+            Activator.CreateInstance((certificateSource as ICertificateSource).OptionsConfigurer, builder.Configuration)
+                as IConfigureNamedOptions<CertificateOptions>;
+        var certOptions = new CertificateOptions();
+        certConfigurer.Configure(certOptions);
+    }
+}
+
+
+var features = new EnvironmentInfo(builder.Configuration);
+
+builder.Services.AddSingleton(features);
+
+//todo: this code should belong in steeltoe
+
+
+if (features.IsConfigServerBound)
+{
+    builder.Configuration
+        .AddConfigServer()
+        // readadd profiles and env vars on top of values from config server as they may alter selection of which keys to use
+        .AddProfiles() 
+        .AddEnvironmentVariables();
+}
+else
+{
+    logger.LogWarning("Config server not being used as no binding information was present");
+}
+
+
 builder.Configuration
-    .AddEnvironmentVariables()
     .AddCommandLine(args)
-    .AddInMemoryCollection(new Dictionary<string, string>
+    .AddInMemoryCollection(new Dictionary<string, string> // used to demonstrate how random and placeholder provider is used
     {
         { "MyConnectionString", "Server=${SqlHost};Database=${SqlDatabase};User Id=${SqlUser};Password=${SqlPassword};" },
         { "AppInstanceId", "${random:value}" }
     })
     .AddRandomValueSource()
     .AddPlaceholderResolver();
-    
+
 
 builder.AddAllActuators();
-
 var services = builder.Services;
+
+if (Platform.IsCloudFoundry)
+{
+    
+    
+    services.AddCloudFoundryContainerIdentity();
+    services.AddAuthentication((options) =>
+        {
+            options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = CloudFoundryDefaults.AuthenticationScheme;
+        })
+        .AddCookie((options) =>
+        {
+            options.AccessDeniedPath = new PathString("/Home/AccessDenied");
+        })
+        .AddCloudFoundryOAuth(builder.Configuration)
+        .AddCloudFoundryIdentityCertificate();
+
+    services.AddAuthorization(cfg =>
+    {
+        cfg.AddPolicy(SecurityPolicy.LoggedIn, policy => policy
+            .AddAuthenticationSchemes(CloudFoundryDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser());
+        cfg.AddPolicy(CloudFoundryDefaults.SameOrganizationAuthorizationPolicy, policy =>
+        {
+            policy.AuthenticationSchemes.Add(CertificateAuthenticationDefaults.AuthenticationScheme);
+            policy.SameOrg();
+        });
+        cfg.AddPolicy(CloudFoundryDefaults.SameSpaceAuthorizationPolicy, policy =>
+        {
+            policy.AuthenticationSchemes.Add(CertificateAuthenticationDefaults.AuthenticationScheme);
+            policy.SameSpace();
+        });
+    });
+}
+
 services.AddDistributedTracing();
 
 //services.AddSpringBootAdminClient(); 
@@ -94,43 +170,48 @@ services.AddScoped<AppEnv>();
 services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 services.AddConfigServerHealthContributor();
 
-var isEurekaBound = builder.Configuration.IsServiceBound<EurekaServiceInfo>();
-var isMySqlServiceBound = builder.Configuration.IsServiceBound<MySqlServiceInfo>();
-var isSqlServerBound = builder.Configuration.IsServiceBound<SqlServerServiceInfo>();
-if (isMySqlServiceBound)
+
+if (features.IsMySqlBound)
 {
     services.AddMySqlHealthContributor(builder.Configuration);
 }
-else if (isSqlServerBound)
+else if (features.IsSqlServerBound)
 {
     services.AddSqlServerHealthContributor(builder.Configuration);
 }
 services.AddDbContext<AttendeeContext>(db =>
 {
-    if (isMySqlServiceBound)
+    if (features.IsMySqlBound)
     {
         db.UseMySql(builder.Configuration);
+        logger.LogInformation("Database Provider: MySQL");
     }
-    else if (isSqlServerBound)
+    else if (features.IsSqlServerBound)
     {
         db.UseSqlServer(builder.Configuration);
+        logger.LogInformation("Database Provider: SQL Server");
+
     }
     else
     {
         var dbFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "users.db");
         db.UseSqlite($"DataSource={dbFile}");
+        logger.LogInformation("Database Provider: SQLite");
+
     }
 });
 services.AddTask<MigrateDbContextTask<AttendeeContext>>(ServiceLifetime.Scoped);
 services.AddTransient<SkipCertValidationHttpHandler>();
 services.AddTransient<TasClientCertificateHttpHandler>();
 
+
+
 var httpClientBuilder = services.AddHttpClient(Options.DefaultName)
     .ConfigurePrimaryHttpMessageHandler<TasClientCertificateHttpHandler>();
 
 
 var config = builder.Configuration;
-if (isEurekaBound)
+if (features.IsEurekaBound)
 {
     services.AddDiscoveryClient();
     httpClientBuilder.AddServiceDiscovery();
@@ -143,48 +224,29 @@ if (isEurekaBound)
         }
     });
 }
+
 else
 {
+    logger.LogWarning("Service discovery (Eureka) integration disabled as no binding information was found. Discovery client will fall back to preconfigured " +
+                      "services found under 'Discovery:Services' configuration key");
     services.AddConfigurationDiscoveryClient(config);
     services.AddSingleton<IDiscoveryClient, ConfigurationDiscoveryClient>();
 }
 
 
-services.AddCloudFoundryContainerIdentity();
-services.AddAuthentication((options) =>
-    {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = CloudFoundryDefaults.AuthenticationScheme;
-    })
-    .AddCookie((options) =>
-    {
-        options.AccessDeniedPath = new PathString("/Home/AccessDenied");
-    })
-    .AddCloudFoundryOAuth(builder.Configuration)
-    .AddCloudFoundryIdentityCertificate();
-
-services.AddAuthorization(cfg =>
-{
-    cfg.AddPolicy(SecurityPolicy.LoggedIn, policy => policy
-        .AddAuthenticationSchemes(CloudFoundryDefaults.AuthenticationScheme)
-        .RequireAuthenticatedUser());
-    cfg.AddPolicy(CloudFoundryDefaults.SameOrganizationAuthorizationPolicy, policy =>
-    {
-        policy.AuthenticationSchemes.Add(CertificateAuthenticationDefaults.AuthenticationScheme);
-        policy.SameOrg();
-    });
-    cfg.AddPolicy(CloudFoundryDefaults.SameSpaceAuthorizationPolicy, policy =>
-    {
-        policy.AuthenticationSchemes.Add(CertificateAuthenticationDefaults.AuthenticationScheme);
-        policy.SameSpace();
-    });
-});
 services.PostConfigure<CertificateOptions>(opt =>
 {
     if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows) && opt.Certificate != null)
     {
-        // work around bug when running on Windows
-        opt.Certificate = new X509Certificate2(opt.Certificate.Export(X509ContentType.Pkcs12));
+        try
+        {
+            // work around bug when running on Windows
+            opt.Certificate = new X509Certificate2(opt.Certificate.Export(X509ContentType.Pkcs12));
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
     }
 });
 
@@ -206,14 +268,10 @@ services
 var app = builder.Build();
 
 app.UseForwardedHeaders();
-// app.Use((context, next) =>
-// {
-//     context.Request.Scheme = "https";
-//     return next();
-// });
 app.UseCookiePolicy(); 
 app.UseDeveloperExceptionPage();
 app.UseStaticFiles();
+app.UseAzureSpringApps();
 app.UseRouting();
 app.UseCloudFoundryCertificateAuth();
 // app.UseAuthentication();

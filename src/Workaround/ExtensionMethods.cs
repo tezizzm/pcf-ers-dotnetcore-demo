@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Steeltoe.Connector.CloudFoundry;
+using Steeltoe.Connector.Services;
 
-namespace Articulate;
+namespace Articulate.Workaround;
 
 public static class ExtensionMethods
 {
@@ -12,6 +13,7 @@ public static class ExtensionMethods
     }
 
     public static bool IsServiceBound<T>(this IConfiguration configuration) where T : class => CloudFoundryServiceInfoCreator.Instance(configuration).GetServiceInfos<T>().Any();
+    public static bool IsServiceBound<T>(this IConfiguration configuration, string name) where T : class, IServiceInfo => CloudFoundryServiceInfoCreator.Instance(configuration).GetServiceInfos<T>().Any(x => x.Id == name);
     public static IConfigurationBuilder AddProfiles(this IConfigurationBuilder builder, string configDir = "")
     {
         if (builder is not IConfiguration config)

@@ -10,6 +10,14 @@
           "type": "string",
           "description": "App Name for inner loop"
         },
+        "AsaResourceGroup": {
+          "type": "string",
+          "description": "Azure Resource Group that owns Azure Spring Apps instance"
+        },
+        "AsaServiceName": {
+          "type": "string",
+          "description": "Azure Spring Apps Service Name"
+        },
         "CfApiEndpoint": {
           "type": "string",
           "description": "Cloud Foundry Endpoint"
@@ -120,6 +128,7 @@
           "items": {
             "type": "string",
             "enum": [
+              "AzureDeploy",
               "CfCreateWorkshopUsers",
               "CfDeleteWorkshopUsers",
               "CfLogin",
@@ -162,6 +171,7 @@
           "items": {
             "type": "string",
             "enum": [
+              "AzureDeploy",
               "CfCreateWorkshopUsers",
               "CfDeleteWorkshopUsers",
               "CfLogin",

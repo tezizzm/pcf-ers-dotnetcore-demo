@@ -1,11 +1,15 @@
 @using Articulate
+@using Articulate.Models
+@using Articulate.Workaround
 @using Microsoft.AspNetCore.Http
 @using Microsoft.Extensions.Configuration
+@using Steeltoe.Common
 @using Steeltoe.Connector
 @using Steeltoe.Connector.CloudFoundry
 @using Steeltoe.Connector.Services
 @using Steeltoe.Extensions.Configuration.CloudFoundry
 @inject IConfiguration Configuration
+@inject EnvironmentInfo EnvironmentInfo
 @inject IHttpContextAccessor HttpContext
 @{
     var request = HttpContext.HttpContext.Request;
@@ -21,7 +25,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="author" content="Andrew Stakhov">
 
-    <title>TAS Demo</title>
+    <title>.NET Demo</title>
 
     <!-- Custom fonts for this template-->
 
@@ -44,7 +48,19 @@
         var basePath = "@basePath";
     </script>
 </head>
-
+@{
+    string icon, platformName;
+    if (Platform2.IsAzureSpringApps)
+    {
+        icon = "~/img/icon-asae.png";
+        platformName = "ASA-E";
+    }
+    else
+    {
+        icon = "~/img/icon-tas.svg";
+        platformName = "TAS";
+    }
+}
 <body id="page-top">
 
 <!-- Page Wrapper -->
@@ -57,9 +73,9 @@
 
         <div class="row align-items-center justify-content-center">
             <div class="col-sm">
-                <img class="img-fluid" src="~/img/icon-pas.svg"/>
+                <img class="img-fluid" src="@Url.Content(icon)"/>
             </div>
-            <div class="col-sm sidebar-brand-text mx-3 sidebar-brand d-flex ">TAS Demo</div>
+            <div class="col-sm sidebar-brand-text mx-3 sidebar-brand d-flex ">@platformName Demo</div>
         </div>
     </div>
 </a>
@@ -211,8 +227,9 @@
     </a>
     <div id="serviceBindings" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
 
-
+        
         <div class="bg-white py-2 collapse-inner rounded">
+            <div v-if="!app.services.length"><h6 class="collapse-header">No service bindings</h6></div>
             <div v-for="(serviceInstances, serviceType) in app.services">
                 <h6 class="collapse-header">{{ serviceType }}</h6>
                 <a class="collapse-item" v-for="si in serviceInstances" v-on:click="selectServiceInstance(serviceType, si.name)"  data-toggle="modal" data-target="#siInfo">{{ si.name }}</a>
@@ -265,8 +282,18 @@
 
 
         <div class="bg-white py-2 collapse-inner rounded">
-            <a class="collapse-item" asp-controller="Security" asp-action="OpenIdConnect">Single Sign On</a>
-            @* <a class="collapse-item" asp-controller="Security" asp-action="Mtls">mTLS</a> *@
+            @if (EnvironmentInfo.IsSsoBound)
+            {
+                <a class="collapse-item" asp-controller="Security" asp-action="OpenIdConnect">Single Sign On</a>
+            }
+            else if(Platform.IsCloudFoundry)
+            {
+                <a class="collapse-item" title="Add SSO binding to enable this demo"><del>Single Sign On</del></a>
+            }
+            @if (EnvironmentInfo.IsContainerCertIdentityConfigured)
+            {
+                <a class="collapse-item" asp-controller="Security" asp-action="Mtls">mTLS</a>
+            }
         </div>
 
     </div>

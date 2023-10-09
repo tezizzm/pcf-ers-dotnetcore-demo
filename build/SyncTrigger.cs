@@ -1,0 +1,5 @@
+﻿enum SyncTrigger
+{
+    Build,
+    Source
+}

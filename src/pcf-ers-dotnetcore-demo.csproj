@@ -6,7 +6,7 @@
     <IsPackable>true</IsPackable>
     <ImplicitUsings>true</ImplicitUsings>
     
-    <SteeltoeVersion>3.2.3</SteeltoeVersion>
+    <SteeltoeVersion>3.2.4</SteeltoeVersion>
     
   </PropertyGroup>
 
@@ -33,6 +33,7 @@
     <PackageReference Include="Steeltoe.Discovery.Eureka" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Extensions.Configuration.CloudFoundryCore" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Extensions.Configuration.ConfigServerCore" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Extensions.Configuration.Kubernetes.ServiceBinding" Version="3.2.4" />
     <PackageReference Include="Steeltoe.Extensions.Configuration.PlaceholderCore" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Extensions.Configuration.RandomValueBase" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Management.CloudFoundryCore" Version="$(SteeltoeVersion)" />

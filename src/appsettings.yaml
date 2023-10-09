@@ -8,10 +8,10 @@ Spring:
         metadata:
           user.name: actuatorUser
           user.password: actuatorPassword
-  Cloud:
-    Config:
-      #Env: blue
-      PollingInterval: "00:00:10"
+#  Cloud:
+#    Config:
+#      #Env: blue
+#      PollingInterval: "00:00:10"
 Security:
   Oauth2:
     Client:
