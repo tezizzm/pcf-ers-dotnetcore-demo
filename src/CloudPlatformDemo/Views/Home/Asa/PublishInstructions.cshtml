@@ -1,0 +1,15 @@
+﻿@{
+    Layout = null;
+}
+<p>Publish the app</p>
+<p>In order to publish the app, you need to ensure you have Azure CLI installed, logged in, and have ASA instance created. If you haven't done this, see this 
+    <a href="https://learn.microsoft.com/en-us/azure/spring-apps/quickstart?pivots=sc-enterprise&tabs=Azure-portal%2CAzure-CLI%2CConsumption-workload">article</a> on how to get started.</p>
+<p>First we need to build (aka "publish") the app targeting Linux environment. This will include all the necessary dependencies the app needs to run. Normally this is done via <code>dotnet publish</code> 
+    from source code folder. Azure CLI needs a single file as a deployment artifact (zip package). 
+    In order to simplify these two steps you can use included build script by running <code>build.sh Pack</code> which will produce a single zip file in `/artifacts` folder.</p>
+
+<p>Now that we have a deployment artifact, we can deploy it on the platform. First, create an app with command like this:</p>
+<p><code>az spring app create --name MyApp --service MyCluster -g MyResourceGroup </code></p>
+<p>After the app is created, we can deploy the artifact with command like this:
+<p><code>az spring app deploy --service AsaServiceName -g AsaResourceGroup --name AppName --artifact-path artifacts/CloudPlatformDemo-X.X.X.zip</code></p>
+

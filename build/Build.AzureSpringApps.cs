@@ -7,15 +7,20 @@ public partial class Build
     string AsaServiceName;
     [Parameter("Azure Resource Group that owns Azure Spring Apps instance")]
     string AsaResourceGroup;
+    [Parameter("Azure Spring Apps Deployment name")]
+    string Deployment = "default";
 
     Target AzureDeploy => _ => _
         .DependsOn(Pack)
+        .Requires(() => AsaServiceName, () => AsaResourceGroup)
         .Executes(() =>
         {
             AzureSpringApps(
-                $"spring app deploy --service {AsaServiceName} -g {AsaResourceGroup} -n {AppName} --artifact-path {ArtifactsDirectory / PackageZipName} --config-file-pattern {AppName}");
+                $"spring app deploy --service {AsaServiceName} -g {AsaResourceGroup} -n {AppName} --artifact-path {ArtifactsDirectory / PackageZipName} --config-file-pattern {AppName} --deployment {Deployment}");
         });
-
+    
+    
+    // Target EnsureAzureAppExists => _ => _
 
     private static IReadOnlyCollection<Output>  AzureSpringApps(string args)
     {

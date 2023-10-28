@@ -1,0 +1,17 @@
+﻿@{
+    Layout = null;
+}
+<p>When running on <platformname/>, binding information about the services attached to the app is injected through <code>VCAP_SERVICES</code> environmental variable. 
+    This will contain information about the service type and the necessary credentials info needed to connect to a dependent service</p>
+
+<p>You can also provision an instance of Spring Config Service and bind it to the app. The service can be configured to pull information from multiple sources, such as Git, Hashicorp Vault, and others and serve config data to apps as a web service.
+    This has the advantage of decoupling your application's deployment lifecycle from the configuration values, which are traditionally managed either through files bundled with the app or environmental variables.</p>
+<p>When the app is configured to use Config Server, the app will connect to it on startup and request it's own configuration values based on the name of the app as configured via <code>Spring:Application:Name</code> config key.</p>
+<p>When using file based configuration source (like Git backend), file naming convention is used to dictate which files are served by Config Server based on application name. 
+    File matching rules are as following:
+    <ol>
+       <li><code>application.yaml</code> - applicable to all apps</li>
+       <li><code>APP_NAME.yaml</code> - configuration specific to an app matched on `Spring:Application:Name` config key
+       <li><code>APP_NAME-ENVIRONMENT.yaml</code> - an environment specific overrides values per app. Environment is controlled via `ASPNETCORE_ENVIRONMENT` environmental variable for .NET apps
+   </ol>
+   Note that values from all these sources get combined, with more specific ones overriding values in less specific yaml files

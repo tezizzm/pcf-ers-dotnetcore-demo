@@ -23,7 +23,7 @@ public partial class Build
     [Parameter("Cloud Foundry Space")]
     string CfSpace;
     [Parameter("App Name for inner loop")]
-    string AppName = "ers";
+    string AppName = "ers1";
     [Parameter("Type of database plan (default: db-small)")]
     readonly string DbPlan = "db-small";
     [Parameter("Type of SSO plan")]
@@ -111,7 +111,7 @@ public partial class Build
     }
 
     Target DeployFull => _ => _
-        .DependsOn(CfLogin, CfTarget, Deploy)
+        .DependsOn(CfLogin, CfTarget, CfDeploy)
         .Executes(() =>
         {
             
@@ -170,7 +170,7 @@ public partial class Build
             Backend.IsInternal = true;
             Apps = new[] { Green, Blue, Backend };
         });
-    Target Deploy => _ => _
+    Target CfDeploy => _ => _
         .After(CfLogin, CfTarget)
         .DependsOn(Pack, EnsureCfCurrentTarget, CreateDeploymentPlan)
         .Description("Deploys {AppsCount} instances to Cloud Foundry /w all dependency services into current target set by cli")
@@ -234,7 +234,7 @@ public partial class Build
                         .SetAppName(app.Name);
                     if (app.IsInternal) // override start command as buildpack sets --urls flag which prevents us from binding to non standard ssl port
                     {
-                        push = push.SetStartCommand("cd ${HOME} && ASPNETCORE_URLS='http://0.0.0.0:8080;https://0.0.0.0:8443' && exec ./Articulate");
+                        push = push.SetStartCommand($"cd ${{HOME}} && ASPNETCORE_URLS='http://0.0.0.0:8080;https://0.0.0.0:8443' && exec ./{AssemblyName}");
                     }
                     return push;
                 }), degreeOfParallelism: 3);

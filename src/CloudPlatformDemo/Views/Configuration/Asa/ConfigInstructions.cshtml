@@ -1,0 +1,8 @@
+﻿@{
+    Layout = null;
+}
+<img src="~/img/asa-config-service.PNG" style="float:right;width:800px"/>
+<p>When running on <platformname/>, you can utilize Configuration Service to manage app's configuration independent off the app. This lets you avoid having to a redeployment or a restart of the app, and helps consolidate configuration for multiple apps into a single git repo.</p>
+<p>In order to use Config Service, you need to create a git repo that can be access from Azure (see image on the right). Each configuration values source (git url) needs to have a pattern associated on which files to pull in from the git repo. Usually this will correspond to application names.</p>
+<p>Finally, we need to map which of the applicable files loaded from git should be applied to the app. This is done via <code>--config-file-pattern PATTERN</code> argument when deploying the app.</p>
+<p>Example: If the git repo contains a single file called <code>myapp.yaml</code>, then the pattern for both Config Service and the deployment parameter for the app would be <code>myapp</code></p>

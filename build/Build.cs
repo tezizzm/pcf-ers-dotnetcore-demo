@@ -63,11 +63,11 @@ partial class Build : NukeBuild
 
 
     string Runtime = "linux-x64";
-    string AssemblyName = "Articulate";
+    string AssemblyName = "CloudPlatformDemo";
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
-    AbsolutePath PublishDirectory => RootDirectory / "src" / "bin" / Configuration / Framework / Runtime  / "publish";
-    string PackageZipName => $"articulate-{GitVersion.SemVer2}.zip";
+    AbsolutePath PublishDirectory => RootDirectory / "src" / "CloudPlatformDemo" / "bin" / Configuration / Framework / Runtime  / "publish";
+    string PackageZipName => $"CloudPlatformDemo-{GitVersion.SemVer2}.zip";
 
     AppDeployment[] Apps;
     AppDeployment Green, Blue, Backend;

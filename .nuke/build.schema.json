@@ -58,6 +58,10 @@
           "type": "string",
           "description": "Type of database plan (default: db-small)"
         },
+        "Deployment": {
+          "type": "string",
+          "description": "Azure Spring Apps Deployment name"
+        },
         "GitHubToken": {
           "type": "string",
           "description": "GitHub personal access token with access to the repo"
@@ -131,13 +135,13 @@
               "AzureDeploy",
               "CfCreateWorkshopUsers",
               "CfDeleteWorkshopUsers",
+              "CfDeploy",
               "CfLogin",
               "CfTarget",
               "Clean",
               "Compile",
               "CreateDeploymentPlan",
               "DeleteApps",
-              "Deploy",
               "DeployFull",
               "EnsureCfCurrentTarget",
               "InnerLoop",
@@ -174,13 +178,13 @@
               "AzureDeploy",
               "CfCreateWorkshopUsers",
               "CfDeleteWorkshopUsers",
+              "CfDeploy",
               "CfLogin",
               "CfTarget",
               "Clean",
               "Compile",
               "CreateDeploymentPlan",
               "DeleteApps",
-              "Deploy",
               "DeployFull",
               "EnsureCfCurrentTarget",
               "InnerLoop",

@@ -1,0 +1,118 @@
+@using Articulate
+@using CloudPlatformDemo.Models
+@using Steeltoe.Connector.Services
+@inject IConfiguration _configuration
+@inject AppEnv _app
+@inject EnvironmentInfo env
+<div class="row" id="page-body">
+	<div class="col-xl-6">
+		<div class="card shadow" >
+			<div class="card-header py-3">
+				<h6 class="m-0 font-weight-bold text-primary">Service Discovery</h6>
+			</div>
+			<div class="card-body">
+				<p>One of the key challanges with microservices is keep track of all the endpoints and dynamically responding to availability of each. Eureka service based on Netflix OSS
+					stack helps us with this. Applications register and advertise their endpoints into a central registry, while other apps can lookup endpoints for their dependencies by using app's 
+					common name.</p>
+				
+				@if(! env.IsEurekaBound)
+				{
+					<p>To get this sample working you need to bind it to an instance of Eureka. Create eureka by following these steps: </p>
+					<ol>
+						<li>Confirm that Eureka is available by running <code>cf marketplace</code> and ensure that a serivce offering of type <code>p.service-registry</code> exists. 
+							If you don't see it offering, your administrator needs to install 
+							<a href="https://network.pivotal.io/products/p-spring-cloud-services/">Spring Cloud Services Tile</a> into TAS.</li>
+						<li>Create service: <code>cf create-service p.service-registry standard eureka</code>. This will take a few minutes.
+							<br/>You can confirm by checking status using <code>cf service mysql</code>.</li>
+						<li>Once service is provisioned, bind it to your app: <code>cf bind-service @_app.AppName eureka</code></li>
+						<li>Restart the app to make it pick up new service binding environmental variable: <code>cf restart  @_app.AppName</code></li>
+					</ol>
+				}
+				else
+				{
+					<p>In this sample, every app bound to same Eureka instance will show up in the list below. You can push this sample multiple times under different app names and watch it appear below.</p>
+					<p>When the app is instrumented with Steeltoe, <code>HttpClient</code> instances can be configured with an HTTP handler that will automatically expand any url that uses service name into it's full address</p>
+					@* <p>You can simulate sending request and getting a reply through multiple apps of this type registered with Eureka using the "Send distributed ping" button. </p> *@
+					<table class="table">
+						<thead>
+						<tr>
+							<th>Service Name</th>
+							<th>Url(s)</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr v-for="(urls, name) in instances">
+							<td>{{ name }}</td>
+							<td>
+								<ul class="list-unstyled">
+									<li v-for="url in urls">{{ url }}</li>
+								</ul>
+							</td>
+						</tr>
+						</tbody>
+					</table>
+					<div class="row">
+						<div class="col-sm">
+							<a href="#" class="btn btn-secondary btn-icon-split" v-on:click="pingAll">
+								<span class="icon text-white-50">
+									<i class="fas fa-exchange-alt"></i>
+								</span>
+								@* <span class="text">Send distributed ping</span> *@
+							</a>
+						</div>
+						<div class="col-sm"><pre>{{ response }}</pre></div>
+					</div>
+					
+				}
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script>
+
+var pageModel = new Vue({
+    el: '#page-body',
+    data: {
+    	app: {},
+        instances: {
+			"test": [
+				"http://localhost"
+    		]},
+    	response: ""
+    },
+    mounted: function() {
+    	var self = this;
+    	self.refresh();
+    	setTimeout(() => self.refresh(), 1000);
+    	var instanceInfoUrl = "@Url.Action("InstanceInfo", "Home")";
+    	$.get(instanceInfoUrl, function(appEnv) {
+            self.app = appEnv;
+		});
+    },
+    methods: {
+        pingAll: function () {
+            var self = this;
+            var targets = Object.keys(self.instances)
+				.filter((el) => {
+					return el !== self.app.appName;
+				})
+				
+				.join(',');
+            $.post("@Url.Action("Ping","ServiceDiscovery")" + "?targets=" + targets)
+             .done(function (result) {
+             	self.response = result;
+            });
+            
+        },
+        refresh: function () {
+    		var self = this;
+    		$.get("@Url.Action("GetServiceDiscoveryInstances","ServiceDiscovery")", function (results) {
+				self.instances = results;
+    		});
+			setTimeout(() => self.refresh(), 1000);
+		}
+    }
+});
+</script>

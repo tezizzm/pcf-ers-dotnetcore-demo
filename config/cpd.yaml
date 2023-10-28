@@ -1,0 +1,6 @@
+﻿---
+LightsaberColor: Purple
+SqlHost: myserver.com
+SqlDatabase: cpd-db
+SqlUser: sa
+SqlPassword: dontusesa

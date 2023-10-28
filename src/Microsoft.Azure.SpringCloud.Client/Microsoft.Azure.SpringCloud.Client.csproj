@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <OutputType>Library</OutputType>
+        <SteeltoeVersion>3.2.4</SteeltoeVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
+        <PackageReference Include="Steeltoe.Common" Version="$(SteeltoeVersion)" />
+        <PackageReference Include="Steeltoe.Common.Security" Version="$(SteeltoeVersion)" />
+        <PackageReference Include="Steeltoe.Extensions.Configuration.Kubernetes.ServiceBinding" Version="$(SteeltoeVersion)" />
+
+
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="SpringCloudConfigurationFileParser.cs" />
+      <Compile Remove="SpringCloudConfigurationProvider.cs" />
+      <Compile Remove="SpringCloudConfigurationSource.cs" />
+    </ItemGroup>
+
+</Project>

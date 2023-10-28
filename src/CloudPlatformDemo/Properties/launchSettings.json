@@ -1,0 +1,91 @@
+{
+  "profiles": {
+//    "default-production": {
+//      "commandName": "Project",
+//      "launchBrowser": false,
+//      "applicationUrl": "https://localhost:5001"
+//    },
+//    "default-development": {
+//      "commandName": "Project",
+//      "launchBrowser": false,
+//      "applicationUrl": "https://localhost:5001",
+//      "environmentVariables": {
+//        "ASPNETCORE_ENVIRONMENT": "Development"
+//      }
+//    },
+    "asae": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "https://localhost:5001",
+      "environmentVariables": {
+        "ASCSVCRT_": "",
+        "AZURE_SPRING_APPS_CONFIG_FILE_PATH": "/etc/azure-spring-cloud/configmap/acs-default-ers1-default-1162a/",
+        "eureka_client_tls_keystore": "file:///etc/azure-spring-cloud/certs/service-runtime-client-cert.p12",
+        "POD_NAME": "ers1-default-4-785d7777d6-5zgld"
+      }
+    },
+    "tas-development-blue": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "VCAP_APPLICATION": "{   }",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VCAP__APPLICATION__NAME": "ers-blue",
+        "SPRING__PROFILES__ACTIVE": "vcap_application",
+        "Eureka__Instance__SecurePort": "5001",
+        "CF_INSTANCE_GUID": "123"
+      },
+      "applicationUrl": "https://localhost:5001"
+    },
+    "tas-development-blue-with-services": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "VCAP_APPLICATION": "{   }",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VCAP__APPLICATION__NAME": "ers-blue",
+        "SPRING__PROFILES__ACTIVE": "vcap_application,vcap_services",
+        "Eureka__Instance__SecurePort": "5001",
+        "CF_INSTANCE_GUID": "123"
+      },
+      "applicationUrl": "https://localhost:5001"
+    },
+    "vcap-blue": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "VCAP_APPLICATION": "{   }",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VCAP__APPLICATION__NAME": "ers-blue",
+        "Eureka__Instance__SecurePort": "5001"
+      },
+      "applicationUrl": "https://localhost:5001"
+    },
+
+    "vcap-green": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "VCAP_APPLICATION": "{   }",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VCAP__APPLICATION__NAME": "ers-green",
+        "Eureka__Instance__SecurePort": "5002"
+      },
+      "applicationUrl": "https://localhost:5002"
+    },
+    "vcap-backend": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "VCAP_APPLICATION": "{   }", 
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SPRING__PROFILES__ACTIVE": "Backend",
+        "VCAP__APPLICATION__NAME": "ers-backend",
+        "Eureka__Instance__PreferIpAddress": "false",
+        "Eureka__Instance__SecureVipAddress": "localhost.internal",
+        "Eureka__Instance__HostName": "localhost.internal" 
+      },
+      "applicationUrl": "https://localhost.internal:8443"
+    }
+  }
+}
