@@ -53,12 +53,10 @@ partial class Build : NukeBuild
     string GitHubToken;
 
     [Solution] readonly Solution Solution;
-
     [GitRepository] GitRepository GitRepository;
-//    [GitVersion] public GitVersion GitVersion { get; set; }
-
     [NerdbankGitVersioning] readonly NerdbankGitVersioning GitVersion;
-
+    [Parameter("App Name for deployments")]
+    string AppName = "cpdemo";
 
 
 

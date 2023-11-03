@@ -13,7 +13,7 @@ namespace CloudPlatformDemo.Utils;
 public class PlatformNameHelper : TagHelper
 {
 
-    public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+    public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         output.TagName = null;
         string platform;
@@ -27,7 +27,7 @@ public class PlatformNameHelper : TagHelper
         }
 
         output.Content.SetContent(platform);
-
+        return Task.CompletedTask;
     }
 
 

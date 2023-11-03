@@ -74,7 +74,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="GeneratedCertificates" />
-    <Folder Include="Workaround\Config\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Azure.SpringCloud.Client\Microsoft.Azure.SpringCloud.Client.csproj" />

@@ -213,8 +213,9 @@ services.AddDbContext<AttendeeContext>(db =>
 services.AddTask<MigrateDbContextTask<AttendeeContext>>(ServiceLifetime.Scoped);
 
 services.AddTransient<SkipCertValidationHttpHandler>();
+services.AddTransient<SkipCertValidationHttpHandlerWithClientCerts>();
 var httpClientBuilder = services.AddHttpClient(Options.DefaultName)
-    .ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandler>();
+     .ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandlerWithClientCerts>();
 
 
 var config = builder.Configuration;
@@ -222,7 +223,14 @@ if (envInfo.IsEurekaBound)
 {
     services.AddDiscoveryClient();
     httpClientBuilder.AddServiceDiscovery();
-    services.AddHttpClient<EurekaDiscoveryClient>("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandler>();
+    if (Platform2.IsAzureSpringApps)
+    {
+        services.AddHttpClient<EurekaDiscoveryClient>("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandlerWithClientCerts>();
+    }
+    else
+    {
+        services.AddHttpClient<EurekaDiscoveryClient>("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandler>();
+    }
     services.PostConfigure<EurekaInstanceOptions>(c => // use for development to set instance ID and other things for simulated c2c communications
     {
         if (c.RegistrationMethod == "direct")

@@ -22,8 +22,6 @@ public partial class Build
     string CfOrg;
     [Parameter("Cloud Foundry Space")]
     string CfSpace;
-    [Parameter("App Name for inner loop")]
-    string AppName = "ers1";
     [Parameter("Type of database plan (default: db-small)")]
     readonly string DbPlan = "db-small";
     [Parameter("Type of SSO plan")]
@@ -110,7 +108,7 @@ public partial class Build
         public bool IsInternal { get; set; }
     }
 
-    Target DeployFull => _ => _
+    Target CfDeployFull => _ => _
         .DependsOn(CfLogin, CfTarget, CfDeploy)
         .Executes(() =>
         {
@@ -118,7 +116,7 @@ public partial class Build
         });
 
 
-    Target EnsureCfCurrentTarget => _ => _
+    Target CfEnsureCurrentTarget => _ => _
         .After(CfTarget, Pack)
         .Executes(() =>
         {
@@ -149,30 +147,30 @@ public partial class Build
             Assert.True(InternalDomain != null);
         });
 
-    Target CreateDeploymentPlan => _ => _
+    Target CfCreateDeploymentPlan => _ => _
         .Unlisted()
-        .DependsOn(EnsureCfCurrentTarget)
+        .DependsOn(CfEnsureCurrentTarget)
         .Executes(() =>
         {
             Green = new AppDeployment
             {
-                Name = "ers-green",
+                Name = $"{AppName}-green",
                 Org = CfOrg,
                 Space = CfSpace,
                 Domain = PublicDomain
             };
             Blue = Green;
-            Blue.Name = "ers-blue";
+            Blue.Name = $"{AppName}-blue";
 
             Backend = Green;
-            Backend.Name = "ers-backend";
+            Backend.Name = $"{AppName}-backend";
             Backend.Domain = InternalDomain;
             Backend.IsInternal = true;
             Apps = new[] { Green, Blue, Backend };
         });
     Target CfDeploy => _ => _
         .After(CfLogin, CfTarget)
-        .DependsOn(Pack, EnsureCfCurrentTarget, CreateDeploymentPlan)
+        .DependsOn(Pack, CfEnsureCurrentTarget, CfCreateDeploymentPlan)
         .Description("Deploys {AppsCount} instances to Cloud Foundry /w all dependency services into current target set by cli")
         .Executes(async () =>
         {
@@ -301,9 +299,9 @@ public partial class Build
                     .SetAppName(app.Name)), degreeOfParallelism: 3);
         });
 
-    Target DeleteApps => _ => _
+    Target CfDeleteApps => _ => _
         .After(CfLogin, CfTarget)
-        .DependsOn(EnsureCfCurrentTarget, CreateDeploymentPlan)
+        .DependsOn(CfEnsureCurrentTarget, CfCreateDeploymentPlan)
         .Executes(() =>
         {
             CloudFoundryDeleteApplication(c => c
