@@ -74,9 +74,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="GeneratedCertificates" />
+    <Folder Include="Pages\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Azure.SpringCloud.Client\Microsoft.Azure.SpringCloud.Client.csproj" />
   </ItemGroup>
-  
+ 
 </Project>

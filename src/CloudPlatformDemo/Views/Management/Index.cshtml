@@ -1,0 +1,95 @@
+﻿<div class="row">
+    <div class="col-xl-6 col-md-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Actuators</h6>
+            </div>
+            <div class="card-body">
+                One of the features that Steeltoe provides are application actuators. Actuators are endpoints that expose useful internal telemetry from the app, and in some cases allow changing app's behavior without restarting.
+                The actuators are normally not exposed to the public as they often contained sensative information about app and it's environment, but are extremely useful for app monitoring and diagnostics.
+                
+                This application has been instrumented with actuators which you can browse on the `/actuator` endpoint. The following actuators are available, though some are not enabled for this app:
+                <table class="table table-bordered table-striped table-condensed">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Description</th>
+                    <th>Demo</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/dbmigrations.html">dbmigrations</a></td>
+                    <td>Provides ability to see current and pending database migrations for an application data source.</td>
+                    <td><a href="~/actuator/dbmigrations"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/env.html">env</a></td>
+                    <td>Reports the keys and values from the application's configuration.</td>
+                    <td><a href="~/actuator/env"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/health.html">health</a></td>
+                    <td>Customizable endpoint that gathers application health information.</td>
+                    <td><a href="~/actuator/health"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/heapdump.html">heapdump</a></td>
+                    <td>Generates and downloads a mini-dump of the application (Windows and Linux only).</td>
+                    <td><a href="~/actuator/heapdump"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/httptrace.html">httptrace</a></td>
+                    <td>Gathers a configurable set of trace information (such as the last 100 HTTP requests).</td>
+                    <td><a href="~/actuator/httptrace"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/hypermedia.html">hypermedia</a></td>
+                    <td>Provides the hypermedia endpoint for discovery of all available endpoints.</td>
+                    <td><a href="~/actuator"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/info.html">info</a></td>
+                    <td>Customizable endpoint that gathers arbitrary application information (such as Git Build info).</td>
+                    <td><a href="~/actuator/info"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/loggers.html">loggers</a></td>
+                    <td>Gathers existing loggers and allows modification of logging levels.</td>
+                    <td><a href="~/actuator/loggers"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/mappings.html">mappings</a></td>
+                    <td>Reports the configured ASP.NET routes and route templates.</td>
+                    <td><a href="~/actuator/mappings"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/metrics.html">metrics</a></td>
+                    <td>Reports the collected metrics for the application.</td>
+                    <td><a href="~/actuator/metrics"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/prometheus.html">prometheus</a></td>
+                    <td>Exposes metrics collected via built-in instrumentation of various aspects of the application in the prometheus format.</td>
+                    <td><a href="~/actuator/prometheus"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/refresh.html">refresh</a></td>
+                    <td>Triggers the application configuration to be reloaded.</td>
+                    <td><a href="~/actuator/refresh"/>View</td>
+                </tr>
+                <tr>
+                    <td><a href="https://docs.steeltoe.io/api/v3/management/threaddump.html">threaddump</a></td>
+                    <td>Generates and reports a snapshot of the application's threads (Windows only).</td>
+                    <td><a href="~/actuator/threaddump"/>View</td>
+                </tr>
+                </tbody>
+                </table>
+                <demofragment name="Actuator"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    
