@@ -31,18 +31,22 @@ internal static class SpringCloudExtensions
                                                            .Any(x => x.StartsWith("ASCSVCRT_"));
 
 
-    internal static string DefaultConfigurationPath
+    internal static string[] DefaultConfigurationPaths
     {
         get
         {
-            var configurationPath = Environment.GetEnvironmentVariable("AZURE_SPRING_APPS_CONFIG_FILE_PATH");
+            var configurationPaths = Environment.GetEnvironmentVariable("AZURE_SPRING_APPS_CONFIG_FILE_PATH")?.Split(",") ?? Array.Empty<string>();
             var fileName = "application.properties";
-            if (!string.IsNullOrEmpty(configurationPath))
+            if (configurationPaths.Any())
             {
-                var isDirectory = Directory.Exists(configurationPath);
-                if (isDirectory)
+                for (int i = 0; i < configurationPaths.Length; i++)
                 {
-                    configurationPath = Path.Combine(configurationPath, fileName);
+                    var path = configurationPaths[i];
+                    var isDirectory = Directory.Exists(path);
+                    if (isDirectory)
+                    {
+                        configurationPaths[i] = Path.Combine(path, fileName);
+                    }
                 }
             }
             else
@@ -53,13 +57,13 @@ internal static class SpringCloudExtensions
                     var springConfigDir = Directory.GetDirectories(configMapDir).FirstOrDefault();
                     if (springConfigDir != null)
                     {
-                        configurationPath = Path.Combine(springConfigDir, fileName);
+                        configurationPaths = new[]{Path.Combine(springConfigDir, fileName)};
                     }
                 }
             }
 
 
-            return configurationPath;
+            return configurationPaths;
         }
     }
     internal static WebApplicationBuilder AddAzureEureka(this WebApplicationBuilder builder)
@@ -90,7 +94,11 @@ internal static class SpringCloudExtensions
 
     internal static IConfigurationBuilder AddSpringCloudConfigServiceFile(this IConfigurationBuilder builder)
     {
-        builder.AddPropertiesFile(DefaultConfigurationPath);
+        foreach (var path in DefaultConfigurationPaths)
+        {
+            builder.AddPropertiesFile(path);
+        }
+        
         return builder;
     }
 

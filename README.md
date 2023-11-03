@@ -25,6 +25,7 @@ This application is interactive and has instructions on each demo page. It shows
 | Single Signon                                                | ✓    |      |
 
 *ASA only injects Application Insights information via standard [Kubernetes Service Binding](https://servicebinding.io/) specification 
+
 **ASA doesn't have LiveView support yet for .NET apps, but actuators endpoints can be viewed manually
 
 The app can be deployed without any dependencies, but some demos require additional services to work. Instructions are embedded into the app itself.
@@ -55,7 +56,7 @@ All available targets are available by running `\build.ps1` with no args
 
   Use this target to automate deployment of full demo to TAS
 
-- `AzureDeploy` - deploys app to Azure Spring Apps Enterprise. If deployment name not specifies, deploys twice into `green` and `blue` deployments
+- `AsaDeploy` - deploys app to Azure Spring Apps Enterprise. If deployment name not specifies, deploys twice into `green` and `blue` deployments
 
 ## Tanzu Application Service
 
@@ -98,7 +99,7 @@ The demo was well on Azure Spring Apps. Due to lack of LiveView for non Spring A
 You can deploy to Azure via an automated build script using the following command
 
 ```
-build.sh AzureDeploy --asa-service-name SERVICE_NAME --asa-resource-group RESOURCE_GROUP
+build.sh AsaDeploy --asa-service-name SERVICE_NAME --asa-resource-group RESOURCE_GROUP
 ```
 
 It will automate configuration of the service and necessary components
