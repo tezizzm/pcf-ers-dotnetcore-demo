@@ -17,6 +17,7 @@ public partial class Build
     string GitRepoUri = "https://github.com/macsux/pcf-ers-dotnetcore-demo";
 
     string ConfigServicePattern = "application,cpdemo,cpdemo-green,cpdemo-blue";
+    // string ConfigServicePattern = "cpdemo,cpdemo-green,cpdemo-blue";
 
     Target AsaDelete => _ => _
         .Executes(() =>

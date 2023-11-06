@@ -1,0 +1,8 @@
+﻿@{
+    Layout = null;
+}
+<p>When running on <platformname/>, this deployment pattern is accomplished through the use of "deployments". Any number of deployments can be created for an app, but only deployment at a time is marked as "Production" and will be receiving traffic on the main URL.
+    New versions of the app can be deployed into non production deployments, verified on their own unique URL, and then moved into production.  </p>
+<p>This demo echos the deployment name of the app that received the request. Click the start button to watch which app is responding to the requests, then deploy a new version of the app into the non production slot (ex. blue). 
+    Verify that the new app has deployed succssefully via it's own private URL (available in Azure portal). Afterwards, move the deployment into production state. You should see the pie chart below change in real time as the new version of the app starts
+    servicing requests</p>

@@ -1,0 +1,6 @@
+﻿@{
+    Layout = null;
+}
+<p>When running on <platformname/>, Blue/Green deployment strategy can be accomplished by deploying a new version of the app as a new app on to the platform. This will give it it's own unique URL which can be used to verify that the app works.
+When you're completely satisfied, reroute traffic from existing app by allowing the new app to respond to requests at same url via <code>cf map-route</code> command, and stop old version of the app from recieving requests via <code>cf unmap-route</code> command.
+Try this while the simulation is running. The name of the app that has serviced the request will be reflected in the chart.

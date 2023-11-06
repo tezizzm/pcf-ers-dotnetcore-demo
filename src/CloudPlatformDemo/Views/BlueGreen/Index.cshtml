@@ -38,20 +38,22 @@
 				<h6 class="m-0 font-weight-bold text-primary">Blue Green Deployment</h6>
 			</div>
 			<div class="card-body">
+				This demo shows how one can deploy a new version of the app, verify that everything works after deployment and app is ready, and then redirect traffic to it. 
+				<demofragment name="Instructions"/>
 				<hr/>
 				<div class="float-right">
 					<a v-on:click="killApp" class="btn btn-danger btn-icon-split" tabindex="1">
-        				<span class="icon text-white-50">
-        					<i class="fas fa-trash"></i>
-        				</span>
-        				<span class="text">Kill</span>
-        			</a>
-					<a id="resetButton" v-on:click="reset" v-if="!isRunning" class="btn btn-primary" tabindex="1">Reset</a> 
-					<a id="loadButton"  v-on:click="toggleTimer" class="btn btn-primary"  tabindex="2">{{ loadButtonLabel }}</a>
+						<span class="icon text-white-50">
+							<i class="fas fa-trash"></i>
+						</span>
+						<span class="text">Kill</span>
+					</a>
+					<a id="resetButton" v-on:click="reset" v-if="!isRunning" class="btn btn-primary" tabindex="1">Reset</a>
+					<a id="loadButton" v-on:click="toggleTimer" class="btn btn-primary" tabindex="2">{{ loadButtonLabel }}</a>
 				</div>
-		
-		
-		
+
+
+
 				<ul class="nav nav-tabs" id="myTab" role="tablist">
 					<li class="nav-item">
 						<a v-on:click="setActiveTabBlueGreen" class="nav-link active" id="bluegreentab" data-toggle="tab" href="#bluegreenpane" role="tab" aria-controls="bluegreentab" aria-selected="true">Blue/Green</a>
@@ -66,13 +68,13 @@
 							This page shows the load balancing between application versions
 							based on route mappings.
 						</p>
-				
+
 						<p v-for="(summary, name) in apps">
 							<b>{{ name }}</b> - {{ summary.count - 1 }}
 						</p>
-			
+
 						<canvas id="pie" width="400" height="400"></canvas>
-				
+
 					</div>
 					@* <div class="tab-pane fade" id="loadbalancepane" role="tabpanel" aria-labelledby="loadbalance-tab"> *@
 					@* 	<canvas id="radar" width="400" height="400"></canvas>				 *@
