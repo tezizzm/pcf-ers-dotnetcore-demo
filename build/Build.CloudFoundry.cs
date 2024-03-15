@@ -73,16 +73,17 @@ public partial class Build
                 os = "linux";
             else
                 os = "osx";
-            var tilt = ToolPathResolver.GetPackageExecutable($"Tilt.CommandLine.{os}-x64", "tilt" + (OperatingSystem.IsWindows() ? ".exe" : ""));
+            // var tilt = ToolPathResolver.GetPackageExecutable($"Tilt.CommandLine.{os}-x64", "tilt" + (OperatingSystem.IsWindows() ? ".exe" : ""));
+            var tilt = ToolPathResolver.GetPathExecutable("tilt");
             var tiltProcess = ProcessTasks.StartProcess(tilt, "up", 
                 workingDirectory: RootDirectory, 
                 environmentVariables: new Dictionary<string, string>(currentEnvVars)
                 {
                     {"APP_NAME", AppName},
-                    {"APP_DIR", "./src"},
+                    {"APP_DIR", "./src/CloudPlatformDemo"},
                     {"SYNC_TRIGGER", SyncTrigger.ToString().ToLower()},
                     {"CF_PUSH_INIT", CfPushInit.ToString().ToLower()},
-                    {"AssemblyName", AssemblyName},
+                    {"MainAssemblyName", AssemblyName},
                     // {"PUSH_PATH", "."},
                     // {"PUSH_COMMAND", $"cd ${{HOME}} && ./watchexec --ignore *.yaml --restart --watch . 'dotnet {AssemblyName}.dll --urls http://0.0.0.0:8080'"},
                     {"TILT_WATCH_WINDOWS_BUFFER_SIZE", "555555"}

@@ -17,32 +17,29 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration.Memory;
 using Microsoft.Extensions.Options;
 using Steeltoe.Common;
+using Steeltoe.Common.Discovery;
 using Steeltoe.Common.Hosting;
-using Steeltoe.Common.Http;
 using Steeltoe.Common.Http.Discovery;
-using Steeltoe.Common.Options;
-using Steeltoe.Common.Security;
-// using Steeltoe.Bootstrap.Autoconfig;
-using Steeltoe.Connector.EFCore;
-using Steeltoe.Connector.MySql;
-using Steeltoe.Connector.Services;
-using Steeltoe.Connector.MySql.EFCore;
-using Steeltoe.Connector.SqlServer;
-using Steeltoe.Connector.SqlServer.EFCore;
+using Steeltoe.Configuration.CloudFoundry;
+using Steeltoe.Configuration.ConfigServer;
+using Steeltoe.Configuration.Placeholder;
+using Steeltoe.Configuration.RandomValue;
+using Steeltoe.Connectors.EntityFrameworkCore;
+using Steeltoe.Connectors.PostgreSql;
 using Steeltoe.Discovery;
+using Steeltoe.Connectors.EntityFrameworkCore.MySql;
+using Steeltoe.Connectors.EntityFrameworkCore.SqlServer;
+using Steeltoe.Connectors.EntityFrameworkCore.PostgreSql;
 using Steeltoe.Discovery.Client;
 using Steeltoe.Discovery.Client.SimpleClients;
-using Steeltoe.Extensions.Configuration.CloudFoundry;
-using Steeltoe.Extensions.Configuration.Placeholder;
-using Steeltoe.Extensions.Configuration.RandomValue;
 using Steeltoe.Management.Endpoint;
-using Steeltoe.Management.TaskCore;
 using Steeltoe.Management.Tracing;
 using Steeltoe.Security.Authentication.CloudFoundry;
 using Steeltoe.Discovery.Eureka;
 using Steeltoe.Extensions.Configuration;
-using Steeltoe.Extensions.Configuration.ConfigServer;
 using Steeltoe.Extensions.Configuration.Kubernetes.ServiceBinding;
+using Steeltoe.Management.Endpoint.Health;
+using Steeltoe.Management.Task;
 using LocalCertificateWriter = CloudPlatformDemo.LocalCerts.LocalCertificateWriter;
 
 var logger = LoggerFactory.Create(c => c
@@ -60,7 +57,11 @@ builder.Configuration
     .AddYamlFile("appsettings.yaml", false, true)
     .AddYamlFile($"appsettings.{builder.Environment.EnvironmentName}.yaml", true, true)
     .AddProfiles();
-    
+if (Platform2.IsTanzuApplicationPlatform)
+{
+    builder.Configuration.AddKubernetesServiceBindings();
+    // var info = builder.Configuration.GetSection("k8s:bindings").GetServiceInfos<EurekaServiceInfo>();
+}
 if (Platform2.IsAzureSpringApps)
 {
     builder.AddAzureSpringApp();
@@ -70,19 +71,25 @@ if (Platform2.IsAzureSpringApps)
         .AddSingleton<IHttpClientHandlerProvider, TempFixHttpClientHandlerProvider>()
         .AddSingleton<ClientCertificateHttpHandler2>();
 }
-
+if (Platform2.IsKubernetes)
+{
+    services.ConfigureOptions(typeof(KubernetesServiceConfigureOptions));
+}
 if (Platform.IsCloudFoundry)
 {
-    builder.Services.RegisterDefaultApplicationInstanceInfo();
-    builder.Services.AddOptions<ApplicationInstanceInfo>().Configure<IApplicationInstanceInfo>((opt, global) =>
-    {
-        opt.Name = global.ApplicationName;
-        opt.Instance_Id = global.InstanceId;
-    }); // a little hack to reregister ApplicationInstanceInfo as options vs singleton that steeltoe does by default. we only use a couple of properties from this class so no need to copy everything
-    builder.UseCloudFoundryCertificateForInternalRoutes();
+    builder.Services.RegisterCloudFoundryApplicationInstanceInfo();
     builder.Configuration
         .AddCloudFoundry()
         .AddCloudFoundryContainerIdentity();
+
+    // builder.Services.AddOptions<IApplicationInstanceInfo>().Configure<IConfiguration>((opt, global) =>
+    // {
+    //     
+    //     // opt.Name = global.ApplicationName;
+    //     // opt.Instance_Id = global.InstanceId;
+    // }); // a little hack to reregister ApplicationInstanceInfo as options vs singleton that steeltoe does by default. we only use a couple of properties from this class so no need to copy everything
+    // builder.UseCloudFoundryCertificateForInternalRoutes();
+
     if (builder.Environment.IsDevelopment())
     {
         builder.UseDevCertificate();
@@ -119,6 +126,10 @@ if (Platform.IsCloudFoundry)
     });
     services.ConfigureOptions(typeof(CloudFoundryServiceConfigureOptions));
 }
+else
+{
+    builder.Services.RegisterDefaultApplicationInstanceInfo();
+}
 
 builder.Configuration
     .AddEnvironmentVariables()
@@ -154,20 +165,6 @@ builder.Configuration
 builder.AddAllActuators();
 
 
-if (Platform2.IsAzureSpringApps)
-{
-    // var applicationInfo = new ApplicationInstanceInfo
-    // {
-    //     Name = builder.Configuration.GetValue<string>("AZURE_SPRING_APPS:APP:NAME")
-    // };
-    // services.Configure<ApplicationInstanceInfo>(c =>
-    // {
-    //     c.Name = builder.Configuration.GetValue<string>("AZURE_SPRING_APPS:APP:NAME");
-    // });
-    //services.Configure<KubernetesServicesOptions>(builder.Configuration);
-    services.ConfigureOptions(typeof(KubernetesServiceConfigureOptions));
-}
-
 
 
 
@@ -180,25 +177,26 @@ services.AddScoped<AppEnv>();
 services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 services.AddConfigServerHealthContributor();
 
-
-if (envInfo.IsMySqlBound)
-{
-    services.AddMySqlHealthContributor(builder.Configuration);
-}
-else if (envInfo.IsSqlServerBound)
-{
-    services.AddSqlServerHealthContributor(builder.Configuration);
-}
-services.AddDbContext<AttendeeContext>(db =>
+//todo: investigate if health contributors are added when using EF 
+// if (envInfo.IsMySqlBound)
+// {
+//     services.AddHealthContributors(); 
+//     services.AddMySqlHealthContributor(builder.Configuration);
+// }
+// else if (envInfo.IsSqlServerBound)
+// {
+//     services.AddSqlServerHealthContributor(builder.Configuration);
+// }
+services.AddDbContext<AttendeeContext>((serviceProvider, db) =>
 {
     if (envInfo.IsMySqlBound)
     {
-        db.UseMySql(builder.Configuration);
+        db.UseMySql(serviceProvider);
         logger.LogInformation("Database Provider: MySQL");
     }
     else if (envInfo.IsSqlServerBound)
     {
-        db.UseSqlServer(builder.Configuration);
+        db.UseSqlServer(serviceProvider);
         logger.LogInformation("Database Provider: SQL Server");
 
     }
@@ -207,7 +205,7 @@ services.AddDbContext<AttendeeContext>(db =>
         var dbFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "users.db");
         db.UseSqlite($"DataSource={dbFile}");
         logger.LogInformation("Database Provider: SQLite");
-
+        
     }
 });
 services.AddTask<MigrateDbContextTask<AttendeeContext>>(ServiceLifetime.Scoped);
@@ -221,7 +219,7 @@ var httpClientBuilder = services.AddHttpClient(Options.DefaultName)
 var config = builder.Configuration;
 if (envInfo.IsEurekaBound)
 {
-    services.AddDiscoveryClient();
+    builder.AddDiscoveryClient();
     httpClientBuilder.AddServiceDiscovery();
     if (Platform2.IsAzureSpringApps)
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Steeltoe.Connector.CloudFoundry;
-using Steeltoe.Connector.Services;
+// using Steeltoe.Connector.CloudFoundry;
+// using Steeltoe.Connector.Services;
 
 namespace CloudPlatformDemo.Workaround;
 
@@ -12,9 +12,9 @@ public static class ExtensionMethods
         context.Database.Migrate();
     }
 
-    public static bool IsServiceBound<T>(this IConfiguration configuration) where T : class => CloudFoundryServiceInfoCreator.Instance(configuration).GetServiceInfos<T>().Any();
-    public static bool IsServiceBound<T>(this IConfiguration configuration, string name) where T : class, IServiceInfo => CloudFoundryServiceInfoCreator.Instance(configuration).GetServiceInfos<T>().Any(x => x.Id == name);
-    
+    // public static bool IsServiceBound<T>(this IConfiguration configuration) where T : class => CloudFoundryServiceInfoCreator.Instance(configuration).GetServiceInfos<T>().Any();
+    // public static bool IsServiceBound<T>(this IConfiguration configuration, string name) where T : class, IServiceInfo => CloudFoundryServiceInfoCreator.Instance(configuration).GetServiceInfos<T>().Any(x => x.Id == name);
+    //
     /// <summary>
     /// Similar to environment override, but allows more then one to be applied per app
     /// </summary>

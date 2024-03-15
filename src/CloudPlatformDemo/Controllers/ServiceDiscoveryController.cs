@@ -21,19 +21,22 @@ public class ServiceDiscoveryController : Controller
         
         
 
-    public Dictionary<string, List<string>> GetServiceDiscoveryInstances(bool includeSelf = false)
+    public async Task<Dictionary<string, List<string>>> GetServiceDiscoveryInstances(bool includeSelf = false, CancellationToken cancellationToken = default)
     {
-        return _discoveryClient.Services
-            .Select(serviceName => new DiscoveredService
+        var thisAppInstance = await _discoveryClient.GetLocalServiceInstanceAsync(cancellationToken);
+        var services = await _discoveryClient.GetServicesAsync(cancellationToken);
+        var instancesTask = services
+            .Select(async serviceName => new DiscoveredService
             {
                 Name = serviceName, 
-                Urls = _discoveryClient.GetInstances(serviceName)
-                    .Where(service => includeSelf || service != _discoveryClient.GetLocalServiceInstance())
+                Urls = (await _discoveryClient.GetInstancesAsync(serviceName, cancellationToken))
+                    .Where(service => includeSelf || service != thisAppInstance)
                     .Select(x => x.Uri.ToString())
                     .Distinct()
                     .ToList()
             })
-            .ToDictionary(x => x.Name, x => x.Urls); 
+            .ToList();
+            return (await Task.WhenAll(instancesTask)).ToDictionary(x => x.Name, x => x.Urls);
     }
 
         

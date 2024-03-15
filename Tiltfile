@@ -2,6 +2,7 @@ version_settings(constraint=">=0.22.1")
 os.putenv ("DOCKER_BUILDKIT" , "1" )
 appName = os.getenv("APP_NAME")
 appFolder = os.getenv("APP_DIR")
+mainAssemblyName = os.getenv("MainAssemblyName")
 
 trigger=os.getenv("SYNC_TRIGGER") # use "build" to trigger deploy after compiling locally. use "source" to trigger on any file change
 rid = "linux-x64"
@@ -10,6 +11,9 @@ configuration = "Debug"
 
 syncFolder = appFolder + "/bin/.buildsync"
 buildSyncCmd = "dotnet publish " + appFolder + " --configuration " + configuration + " --runtime " + rid + " --no-self-contained --output " + syncFolder + " /p:LiveSync=true"
+#syncFolder = "./bin/.buildsync"
+#buildSyncCmd = "dotnet publish"# --configuration " + configuration + " --runtime " + rid + " --no-self-contained --output " + syncFolder + " /p:LiveSync=true"
+
 isWindows = True if os.name == "nt" else False
 expected_ref = "%EXPECTED_REF%" if isWindows else "$EXPECTED_REF"
 
@@ -27,7 +31,8 @@ local_resource(
   "live-update-build",
   cmd= buildSyncCmd,
   deps=trigger_deps,
-  ignore=trigger_ignore
+  ignore=trigger_ignore,
+  #dir=appFolder
 )
 
 docker_compose("docker-compose.yaml")

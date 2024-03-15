@@ -1,6 +1,5 @@
 ﻿using CloudPlatformDemo.Workaround;
 using Steeltoe.Common;
-using Steeltoe.Connector.Services;
 
 namespace CloudPlatformDemo.Models;
 
@@ -14,10 +13,15 @@ public class EnvironmentInfo
     }
 
     public bool IsContainerCertIdentityConfigured => IsCloudFoundry && _configuration.GetValue<string>("certificate") != null && _configuration["privateKey"] != null;
-    public bool IsSsoBound => _configuration.IsServiceBound<SsoServiceInfo>();
-    public bool IsMySqlBound => _configuration.IsServiceBound<MySqlServiceInfo>();
-    public bool IsEurekaBound => _configuration.IsServiceBound<EurekaServiceInfo>() || _configuration.GetValue<string>("Eureka:Client:ServiceUrl") != null;
-    public bool IsSqlServerBound => _configuration.IsServiceBound<SqlServerServiceInfo>();
+    //todo: figure out logic for if service is bound
+    // public bool IsSsoBound => _configuration.IsServiceBound<SsoServiceInfo>(); 
+    // public bool IsMySqlBound => _configuration.IsServiceBound<MySqlServiceInfo>();
+    // public bool IsEurekaBound => _configuration.IsServiceBound<EurekaServiceInfo>() || _configuration.GetValue<string>("Eureka:Client:ServiceUrl") != null;
+    // public bool IsSqlServerBound => _configuration.IsServiceBound<SqlServerServiceInfo>();
+    public bool IsSsoBound => false; 
+    public bool IsMySqlBound => false;
+    public bool IsEurekaBound => true;
+    public bool IsSqlServerBound => false;
     public bool IsConfigServerBound => _configuration
         .GetSection("spring:cloud")
         .GetChildren()

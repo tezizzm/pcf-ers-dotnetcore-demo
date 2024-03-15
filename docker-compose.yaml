@@ -8,5 +8,5 @@ services:
       - ${APP_DIR}/bin/.buildsync:/syncorig # work around sync folder being available during first build inside /syncorig and then updated by tilt during livesync into /sync
     environment:
       APP_NAME: ${APP_NAME}
-      AssemblyName: ${AssemblyName}
+      AssemblyName: ${MainAssemblyName}
       CF_PUSH_INIT: ${CF_PUSH_INIT}

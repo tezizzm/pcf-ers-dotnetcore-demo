@@ -4,10 +4,6 @@
 @using Microsoft.AspNetCore.Http
 @using Microsoft.Extensions.Configuration
 @using Steeltoe.Common
-@using Steeltoe.Connector
-@using Steeltoe.Connector.CloudFoundry
-@using Steeltoe.Connector.Services
-@using Steeltoe.Extensions.Configuration.CloudFoundry
 @inject IConfiguration Configuration
 @inject EnvironmentInfo EnvironmentInfo
 @inject IHttpContextAccessor HttpContext
@@ -55,10 +51,20 @@
         icon = "~/img/icon-asae.png";
         platformName = "ASA-E";
     }
+    else if(Platform.IsCloudFoundry)
+    {
+        icon = "~/img/icon-tanzu.svg";
+        platformName = "TAS";
+    }
+    else if (Platform2.IsTanzuApplicationPlatform)
+    {
+        icon = "~/img/icon-tanzu.svg";
+        platformName = "TAP";
+    }
     else
     {
-        icon = "~/img/icon-tas.svg";
-        platformName = "TAS";
+        icon = "~/img/docker-png";
+        platformName = "Cloud";
     }
 }
 <body id="page-top">
@@ -199,7 +205,7 @@
                     <div class="col-3">
                         <strong>{{ key }} </strong>
                     </div>
-                    <div class="col-sm">{{ value }}</div>
+                    <div class="col-sm"><pre>{{ value }}</pre></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -258,12 +264,15 @@
         </a>
     </li>
 }
-<li class="nav-item">
-    <a class="nav-link" asp-controller="BlueGreen" asp-action="Index">
-        <i class="fas fa-fw fa-adjust"></i>
-        <span>Blue / Green</span>
-    </a>
-</li>
+@if (!Platform2.IsTanzuApplicationPlatform)
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="BlueGreen" asp-action="Index">
+            <i class="fas fa-fw fa-adjust"></i>
+            <span>Blue / Green</span>
+        </a>
+    </li>
+}
 <li class="nav-item">
     <a class="nav-link" asp-controller="Configuration" asp-action="Index">
         <i class="fas fa-fw fa-cog"></i>
@@ -346,13 +355,13 @@
     <!-- End of Main Content -->
 
     <!-- Footer -->
-    <footer class="sticky-footer bg-white">
-        <div class="container my-auto">
-            <div class="copyright text-center my-auto">
-                <span>Copyright &copy; Your Website 2019</span>
-            </div>
-        </div>
-    </footer>
+    @* <footer class="sticky-footer bg-white"> *@
+    @*     <div class="container my-auto"> *@
+    @*         <div class="copyright text-center my-auto"> *@
+    @*             <span>Copyright &copy; Your Website 2019</span> *@
+    @*         </div> *@
+    @*     </div> *@
+    @* </footer> *@
     <!-- End of Footer -->
 
 </div>

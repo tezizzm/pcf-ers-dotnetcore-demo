@@ -11,16 +11,16 @@ namespace CloudPlatformDemo.Models;
 public class AppEnv
 {
     public AppEnv(IHttpContextAccessor context, 
-        IOptionsSnapshot<ApplicationInstanceInfo> appInfo, 
+        IApplicationInstanceInfo appInfo, 
         IOptionsSnapshot<ServiceBindings> services,
         IHostEnvironment environment,
         IConfiguration configuration)
     {
         var connectionContext = context.HttpContext.Features.Get<IHttpConnectionFeature>();
         ContainerAddress = $"{connectionContext.LocalIpAddress}:{connectionContext.LocalPort}";
-        AppName = appInfo.Value.Name ?? configuration.GetValue<string>("Spring:Application:Name");
+        AppName = appInfo.ApplicationName ?? configuration.GetValue<string>("Spring:Application:Name");
         DeploymentName = configuration.GetValue<string>("AZURE_SPRING_APPS:DEPLOYMENT:NAME") ?? AppName;
-        InstanceName =  !string.IsNullOrEmpty(appInfo.Value.InstanceId) ? appInfo.Value.InstanceId : System.Environment.GetEnvironmentVariable("CF_INSTANCE_GUID");
+        InstanceName =  !string.IsNullOrEmpty(appInfo.InstanceId) ? appInfo.InstanceId : System.Environment.GetEnvironmentVariable("CF_INSTANCE_GUID");
         Services = services.Value.Services.GroupBy(x => x.Type).ToDictionary(x => x.Key, x => x.ToList());
         ClrVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
         HostAddress = System.Environment.GetEnvironmentVariable("CF_INSTANCE_ADDR") ?? "localhost";

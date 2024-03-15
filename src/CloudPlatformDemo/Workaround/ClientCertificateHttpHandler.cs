@@ -12,13 +12,15 @@ public class ClientCertificateHttpHandler2 : HttpClientHandler
 {
     private readonly SemaphoreSlim _lock = new (1);
     private readonly IOptionsMonitor<CertificateOptions> _certificateOptions;
+    private readonly string _name;
     private CertificateOptions _lastValue;
 
-    public ClientCertificateHttpHandler2(IOptionsMonitor<CertificateOptions> certOptions)
+    public ClientCertificateHttpHandler2(IOptionsMonitor<CertificateOptions> certOptions, string name = "")
     {
         _certificateOptions = certOptions;
+        _name = name ?? Options.DefaultName;
         _certificateOptions.OnChange(RotateCert);
-        RotateCert(_certificateOptions.CurrentValue);
+        RotateCert(_certificateOptions.Get(_name));
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -34,8 +36,10 @@ public class ClientCertificateHttpHandler2 : HttpClientHandler
         }
     }
 
+    // ReSharper disable once RedundantAssignment
     private void RotateCert(CertificateOptions newCert)
     {
+        newCert = _certificateOptions.Get(_name);
         if (newCert.Certificate == null)
         {
             return;

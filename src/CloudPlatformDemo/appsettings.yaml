@@ -50,3 +50,7 @@ Discovery:
   - ServiceId: ers-green
     Host: localhost
     Port: 5000
+Steeltoe:
+  Kubernetes:
+    Bindings:
+      Enable: True

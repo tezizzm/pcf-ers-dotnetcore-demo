@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.TagHelpers;
+﻿using CloudPlatformDemo.Workaround;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures.Buffers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -21,9 +22,17 @@ public class PlatformNameHelper : TagHelper
         {
             platform = "Tanzu Application Service";
         }
-        else
+        else if (Platform2.IsAzureSpringApps)
         {
             platform = "Azure Spring Apps Enterprise";
+        }
+        else if (Platform2.IsTanzuApplicationPlatform)
+        {
+            platform = "Tanzu Application Platform";
+        }
+        else
+        {
+            platform = "Containers";
         }
 
         output.Content.SetContent(platform);

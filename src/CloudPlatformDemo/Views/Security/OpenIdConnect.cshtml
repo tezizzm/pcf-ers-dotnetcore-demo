@@ -1,11 +1,12 @@
 @using Articulate
 @using CloudPlatformDemo.Models
 @using CloudPlatformDemo.Workaround
-@using Steeltoe.Connector.Services
-@using Steeltoe.Extensions.Configuration.CloudFoundry
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Steeltoe.Configuration.CloudFoundry
 @inject IConfiguration _configuration
 @inject AppEnv _app
 @inject CloudFoundryApplicationOptions _cfApp;
+@inject EnvironmentInfo _envInfo;
 @{
     var sysDomain = _cfApp.CF_Api.Replace("https://api.", "");
     var identityAdminUrl = $"https://p-identity.{sysDomain}";
@@ -23,7 +24,7 @@
         </p>
         
         
-        @if (!_configuration.IsServiceBound<SsoServiceInfo>())
+        @if (!_envInfo.IsSsoBound)
         {
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Steeltoe.Discovery;
+using Steeltoe.Discovery.Eureka;
 
 namespace CloudPlatformDemo.Controllers;
 
@@ -32,11 +33,11 @@ public class SecurityController : Controller
         return RedirectToAction(nameof(OpenIdConnect));
     }
 
-    public async Task<string> CallMtlsService([FromServices]IHttpClientFactory httpFactory, [FromServices]IDiscoveryClient discoveryClient)
+    public async Task<string> CallMtlsService([FromServices]IHttpClientFactory httpFactory, [FromServices]DiscoveryClient discoveryClient)
     {
         var client = httpFactory.CreateClient();
         
-        var anotherAppName = discoveryClient.Services.FirstOrDefault(x => x != _app.AppName);
+        var anotherAppName = discoveryClient.Applications.GetRegisteredApplications().FirstOrDefault(x => x.Name != _app.AppName);
         if (anotherAppName == null)
         {
             return "Another instance of the app needs to be registered with eureka";

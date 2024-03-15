@@ -17,6 +17,7 @@ using Nuke.Common.Tools.Git;
 using Nuke.Common.Tools.GitHub;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.NerdbankGitVersioning;
+using Nuke.Common.Tools.Tanzu;
 using Nuke.Common.Utilities.Collections;
 using Octokit;
 using Serilog;
@@ -80,6 +81,17 @@ partial class Build : NukeBuild
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
+    Target TanzuDeploy => _ => _
+        .Executes(() =>
+        {
+            var output = TanzuTasks.TanzuAppsWorkloadApply(c => c
+                .SetLocalPath("../app")
+                .EnableTail()
+                .AddEnv("ENV1", "value")
+                .AddEnv("ENV2", "value")
+                .SetAppName("MyApp"));
+            output.EnsureOnlyStd();
+        });
     Target Restore => _ => _
         .Description("Restore nuget packages")
         .Executes(() =>

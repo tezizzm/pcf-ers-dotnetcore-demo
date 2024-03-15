@@ -1,20 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <IsPackable>true</IsPackable>
+    <TargetFramework>net8.0</TargetFramework>
+<!--    <IsPackable>true</IsPackable>-->
     <ImplicitUsings>true</ImplicitUsings>
-    
-    <SteeltoeVersion>3.2.4</SteeltoeVersion>
-    
+    <SteeltoeSourcePath>..\..\..\Steeltoe\Steeltoe</SteeltoeSourcePath>
+<!--    <SteeltoeVersion>3.2.6</SteeltoeVersion>-->
+    <SteeltoeVersion>4.0.311-alpha</SteeltoeVersion>
+    <SteeltoeMajorVersion>$(SteeltoeVersion.Substring(0,1))</SteeltoeMajorVersion>
+    <UseSteeltoeSourceCode>false</UseSteeltoeSourceCode>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="GitInfo" Version="2.3.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.16" />
-    <PackageReference Include="Microsoft.Azure.SpringCloud.Client" Version="2.0.0-preview.3" />
+<!--    <PackageReference Include="Microsoft.Azure.SpringCloud.Client" Version="2.0.0-preview.3" />-->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.16">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -22,8 +23,48 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.16" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.16" />
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
-    <PackageReference Include="Steeltoe.Discovery.ClientCore" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="8.0.3" />
+
+  </ItemGroup> 
+  <ItemGroup Condition="'$(UseSteeltoeSourceCode)' == 'true'">
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Discovery\src\Abstractions\Steeltoe.Discovery.Abstractions.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Discovery\src\Eureka\Steeltoe.Discovery.Eureka.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Discovery\src\Client\Steeltoe.Discovery.Client.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Connectors\src\Connectors\Steeltoe.Connectors.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Connectors\src\EntityFrameworkCore\Steeltoe.Connectors.EntityFrameworkCore.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Connectors\src\CloudFoundry\Steeltoe.Connectors.CloudFoundry.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Common\src\Common.Hosting\Steeltoe.Common.Hosting.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Configuration\src\CloudFoundry\Steeltoe.Configuration.CloudFoundry.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Configuration\src\CloudFoundry.ServiceBinding\Steeltoe.Configuration.CloudFoundry.ServiceBinding.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Configuration\src\ConfigServer\Steeltoe.Configuration.ConfigServer.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Configuration\src\Kubernetes.ServiceBinding\Steeltoe.Configuration.Kubernetes.ServiceBinding.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Configuration\src\Placeholder\Steeltoe.Configuration.Placeholder.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Configuration\src\RandomValue\Steeltoe.Configuration.RandomValue.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Management\src\Endpoint\Steeltoe.Management.Endpoint.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Management\src\Task\Steeltoe.Management.Task.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Management\src\Tracing\Steeltoe.Management.Tracing.csproj"/>
+    <ProjectReference Include="$(SteeltoeSourcePath)\src\Security\src\Authentication.CloudFoundry\Steeltoe.Security.Authentication.CloudFoundry.csproj"/>
+  </ItemGroup>
+  <ItemGroup Label="Steeltoe3" Condition="'$(SteeltoeMajorVersion)' == '4'">
+    <PackageReference Include="Steeltoe.Discovery.Client" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Connectors.EntityFrameworkCore" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Connectors" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Connector.CloudFoundry" Version="4.0.100-alpha" />
+    <PackageReference Include="Steeltoe.Common.Hosting" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Discovery.Eureka" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Configuration.CloudFoundry" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Configuration.ConfigServer" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Configuration.Kubernetes.ServiceBinding" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Configuration.Placeholder" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Configuration.RandomValue" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Management.Endpoint" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Management.Task" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Management.Tracing" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Security.Authentication.CloudFoundry" Version="$(SteeltoeVersion)" />
+  </ItemGroup>
+  <ItemGroup Label="Steeltoe3" Condition="'$(SteeltoeMajorVersion)' == '3'">
+    <PackageReference Include="Steeltoe.Discovery.ClientCore" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Connector.EFCore" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Connector.ConnectorCore" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Connector.CloudFoundry" Version="$(SteeltoeVersion)" />
@@ -77,6 +118,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Azure.SpringCloud.Client\Microsoft.Azure.SpringCloud.Client.csproj" />
+    <ProjectReference Include="..\Steeltoe.Workarounds\Steeltoe.Workarounds.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="Views\Home\Tap\Intro.cshtml" />
+    <AdditionalFiles Include="Views\Home\Tap\PublishInstructions.cshtml" />
   </ItemGroup>
 
 </Project>
