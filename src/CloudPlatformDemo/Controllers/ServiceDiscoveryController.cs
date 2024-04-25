@@ -1,5 +1,6 @@
 ﻿using CloudPlatformDemo.Models;
 using Microsoft.AspNetCore.Mvc;
+using Steeltoe.Common.Discovery;
 using Steeltoe.Discovery;
 
 namespace CloudPlatformDemo.Controllers;
@@ -23,8 +24,8 @@ public class ServiceDiscoveryController : Controller
 
     public async Task<Dictionary<string, List<string>>> GetServiceDiscoveryInstances(bool includeSelf = false, CancellationToken cancellationToken = default)
     {
-        var thisAppInstance = await _discoveryClient.GetLocalServiceInstanceAsync(cancellationToken);
-        var services = await _discoveryClient.GetServicesAsync(cancellationToken);
+        var thisAppInstance = _discoveryClient.GetLocalServiceInstance();
+        var services = await _discoveryClient.GetServiceIdsAsync(cancellationToken);
         var instancesTask = services
             .Select(async serviceName => new DiscoveredService
             {

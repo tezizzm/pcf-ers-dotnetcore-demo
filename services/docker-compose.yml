@@ -1,17 +1,17 @@
 version: "3.0"
 
 services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    restart: always
-    ports:
-      - 1433:1433
-    volumes:
-      # - ./data/sqlserver:/var/opt/mssql
-      - sqlServerData:/var/opt/mssql
-    environment:
-      ACCEPT_EULA: Y
-      SA_PASSWORD: P@ssword
+  # sqlserver:
+  #   image: mcr.microsoft.com/mssql/server:2019-latest
+  #   restart: always
+  #   ports:
+  #     - 1433:1433
+  #   volumes:
+  #     # - ./data/sqlserver:/var/opt/mssql
+  #     - sqlServerData:/var/opt/mssql
+  #   environment:
+  #     ACCEPT_EULA: Y
+  #     SA_PASSWORD: P@ssword
 
   configserver:
     image: steeltoeoss/config-server
@@ -36,10 +36,10 @@ services:
     environment:
       eureka_server_enableSelfPreservation: "false"
 
-  spring-boot-admin:
-    image: steeltoeoss/spring-boot-admin
-    ports: 
-      - "9090:8080"
+  # spring-boot-admin:
+  #   image: steeltoeoss/spring-boot-admin
+  #   ports: 
+  #     - "9090:8080"
 
   mysql:
      image: mysql:5.7
@@ -50,25 +50,25 @@ services:
      environment:
        MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
   
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
-    depends_on: 
-      - mysql
-    environment:
-     - PMA_HOST=mysql
-     - PMA_USER=root
-     - PMA_PASSWORD=
-    restart: always
-    ports:
-     - 8083:80
-    volumes:
-     - /sessions
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin
+  #   container_name: phpmyadmin
+  #   depends_on: 
+  #     - mysql
+  #   environment:
+  #    - PMA_HOST=mysql
+  #    - PMA_USER=root
+  #    - PMA_PASSWORD=
+  #   restart: always
+  #   ports:
+  #    - 8083:80
+  #   volumes:
+  #    - /sessions
       
-  zipkin:
-    image: openzipkin/zipkin
-    ports:
-      - 9411:9411
+  # zipkin:
+  #   image: openzipkin/zipkin
+  #   ports:
+  #     - 9411:9411
     
 
 

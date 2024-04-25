@@ -8,7 +8,7 @@ using Steeltoe.Common.Options;
 
 namespace CloudPlatformDemo.Workaround;
 
-public class ClientCertificateHttpHandler2 : HttpClientHandler
+public class  ClientCertificateHttpHandler2 : HttpClientHandler
 {
     private readonly SemaphoreSlim _lock = new (1);
     private readonly IOptionsMonitor<CertificateOptions> _certificateOptions;

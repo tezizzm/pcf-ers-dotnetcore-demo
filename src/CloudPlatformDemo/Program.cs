@@ -15,13 +15,17 @@ using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.Azure.SpringCloud.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration.Memory;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Steeltoe.Common;
 using Steeltoe.Common.Discovery;
 using Steeltoe.Common.Hosting;
-using Steeltoe.Common.Http.Discovery;
+using Steeltoe.Common.Logging;
+// using Steeltoe.Common.Http.Discovery;
 using Steeltoe.Configuration.CloudFoundry;
+using Steeltoe.Configuration.CloudFoundry.ServiceBinding;
 using Steeltoe.Configuration.ConfigServer;
+using Steeltoe.Configuration.Kubernetes.ServiceBinding;
 using Steeltoe.Configuration.Placeholder;
 using Steeltoe.Configuration.RandomValue;
 using Steeltoe.Connectors.EntityFrameworkCore;
@@ -30,16 +34,18 @@ using Steeltoe.Discovery;
 using Steeltoe.Connectors.EntityFrameworkCore.MySql;
 using Steeltoe.Connectors.EntityFrameworkCore.SqlServer;
 using Steeltoe.Connectors.EntityFrameworkCore.PostgreSql;
-using Steeltoe.Discovery.Client;
-using Steeltoe.Discovery.Client.SimpleClients;
+// using Steeltoe.Discovery.Client;
+using Steeltoe.Discovery.Configuration;
 using Steeltoe.Management.Endpoint;
 using Steeltoe.Management.Tracing;
 using Steeltoe.Security.Authentication.CloudFoundry;
 using Steeltoe.Discovery.Eureka;
+using Steeltoe.Discovery.Eureka.Configuration;
+using Steeltoe.Discovery.HttpClients;
 using Steeltoe.Extensions.Configuration;
-using Steeltoe.Extensions.Configuration.Kubernetes.ServiceBinding;
 using Steeltoe.Management.Endpoint.Health;
 using Steeltoe.Management.Task;
+using ConfigurationBuilderExtensions = Steeltoe.Configuration.CloudFoundry.ServiceBinding.ConfigurationBuilderExtensions;
 using LocalCertificateWriter = CloudPlatformDemo.LocalCerts.LocalCertificateWriter;
 
 var logger = LoggerFactory.Create(c => c
@@ -65,11 +71,11 @@ if (Platform2.IsTanzuApplicationPlatform)
 if (Platform2.IsAzureSpringApps)
 {
     builder.AddAzureSpringApp();
-    
+    builder.Services.AddEurekaDiscoveryClient();//.AddServiceDiscovery(builder.Configuration, c => c.UseEureka());
     // these line is a hack for a bug that overrides use of ClientCertificateHttpHandler with one implemented in this demo. Should be backported into steeltoe
-    builder.Services
-        .AddSingleton<IHttpClientHandlerProvider, TempFixHttpClientHandlerProvider>()
-        .AddSingleton<ClientCertificateHttpHandler2>();
+    // builder.Services
+    //     .AddSingleton<IHttpClientHandlerProvider, TempFixHttpClientHandlerProvider>()
+    //     .AddSingleton<ClientCertificateHttpHandler2>();
 }
 if (Platform2.IsKubernetes)
 {
@@ -78,6 +84,16 @@ if (Platform2.IsKubernetes)
 if (Platform.IsCloudFoundry)
 {
     builder.Services.RegisterCloudFoundryApplicationInstanceInfo();
+    if (Environment.GetEnvironmentVariable("VCAP_SERVICES") != null)
+    {
+        builder.Configuration.AddCloudFoundryServiceBindings();
+    }
+    else
+    {
+        // in local development, it's easier to manage values normally supplied by vcap_services env var in a yaml file
+        builder.Configuration.AddCloudFoundryServiceBindings(_ => false, new YamlServiceBindingsReader("vcap_services.yaml"), BootstrapLoggerFactory.Default);
+    }
+
     builder.Configuration
         .AddCloudFoundry()
         .AddCloudFoundryContainerIdentity();
@@ -219,16 +235,18 @@ var httpClientBuilder = services.AddHttpClient(Options.DefaultName)
 var config = builder.Configuration;
 if (envInfo.IsEurekaBound)
 {
-    builder.AddDiscoveryClient();
+    // builder.Services.AddServiceDiscovery(builder.Configuration, c => c.UseEureka());
+    builder.Services.AddEurekaDiscoveryClient();
     httpClientBuilder.AddServiceDiscovery();
-    if (Platform2.IsAzureSpringApps)
-    {
-        services.AddHttpClient<EurekaDiscoveryClient>("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandlerWithClientCerts>();
-    }
-    else
-    {
-        services.AddHttpClient<EurekaDiscoveryClient>("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandler>();
-    }
+    // todo: should be easier to do this with v4 now
+    // if (Platform2.IsAzureSpringApps)
+    // {
+    //     services.AddHttpClient<EurekaDiscoveryClient>("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandlerWithClientCerts>();
+    // }
+    // else
+    // {
+    //     services.AddHttpClient<EurekaDiscoveryClient>("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandler>();
+    // }
     services.PostConfigure<EurekaInstanceOptions>(c => // use for development to set instance ID and other things for simulated c2c communications
     {
         if (c.RegistrationMethod == "direct")
@@ -242,7 +260,7 @@ else
 {
     logger.LogWarning("Service discovery (Eureka) integration disabled as no binding information was found. Discovery client will fall back to preconfigured " +
                       "services found under 'Discovery:Services' configuration key");
-    services.AddConfigurationDiscoveryClient(config);
+    services.AddConfigurationDiscoveryClient();
     services.AddSingleton<IDiscoveryClient, ConfigurationDiscoveryClient>();
 }
 
@@ -293,13 +311,10 @@ app.UseCloudFoundryCertificateAuth();
 // app.UseAuthentication();
 // app.UseAuthorization();
 
-
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllerRoute(
+app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
-});
 app.EnsureMigrationOfContext<AttendeeContext>();
-            
+
+var configValues = builder.Configuration.AsEnumerable().ToList();
 app.Run();

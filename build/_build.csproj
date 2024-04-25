@@ -28,10 +28,4 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\..\nuke\source\Nuke.Common\Tools\Tanzu\Tanzu.Generated.cs">
-      <Link>Nuke\Common\Tools\Tanzu\Tanzu.Generated.cs</Link>
-    </Compile>
-  </ItemGroup>
-
 </Project>

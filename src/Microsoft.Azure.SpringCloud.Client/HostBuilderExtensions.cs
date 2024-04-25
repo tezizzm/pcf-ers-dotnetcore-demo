@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Steeltoe.Common;
-using Steeltoe.Extensions.Configuration.Kubernetes.ServiceBinding;
 
 namespace Microsoft.Azure.SpringCloud.Client;
 public static class HostBuilderExtensions

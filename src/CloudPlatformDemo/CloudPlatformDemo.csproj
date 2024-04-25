@@ -5,7 +5,9 @@
     <ImplicitUsings>true</ImplicitUsings>
     <SteeltoeSourcePath>..\..\..\Steeltoe\Steeltoe</SteeltoeSourcePath>
 <!--    <SteeltoeVersion>3.2.6</SteeltoeVersion>-->
-    <SteeltoeVersion>4.0.311-alpha</SteeltoeVersion>
+<!--    <SteeltoeVersion>4.0.311-alpha</SteeltoeVersion>-->
+    <SteeltoeVersion>4.0.323-alpha</SteeltoeVersion>
+    <!-- Packages were renamed in steeltoe 4.x - different imports are required depending on major version we're targeting -->
     <SteeltoeMajorVersion>$(SteeltoeVersion.Substring(0,1))</SteeltoeMajorVersion>
     <UseSteeltoeSourceCode>false</UseSteeltoeSourceCode>
   </PropertyGroup>
@@ -24,7 +26,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.16" />
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="8.0.3" />
+    <PackageReference Include="YamlDotNet" Version="15.1.2" />
+<!--    <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="8.0.3" />-->
 
   </ItemGroup> 
   <ItemGroup Condition="'$(UseSteeltoeSourceCode)' == 'true'">
@@ -46,13 +49,15 @@
     <ProjectReference Include="$(SteeltoeSourcePath)\src\Management\src\Tracing\Steeltoe.Management.Tracing.csproj"/>
     <ProjectReference Include="$(SteeltoeSourcePath)\src\Security\src\Authentication.CloudFoundry\Steeltoe.Security.Authentication.CloudFoundry.csproj"/>
   </ItemGroup>
-  <ItemGroup Label="Steeltoe3" Condition="'$(SteeltoeMajorVersion)' == '4'">
-    <PackageReference Include="Steeltoe.Discovery.Client" Version="$(SteeltoeVersion)" />
+  <ItemGroup Label="Steeltoe4" Condition="'$(SteeltoeMajorVersion)' == '4'">
+<!--    <PackageReference Include="Steeltoe.Discovery.Client" Version="$(SteeltoeVersion)" />-->
+    <PackageReference Include="Steeltoe.Discovery.HttpClients" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Connectors.EntityFrameworkCore" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Connectors" Version="$(SteeltoeVersion)" />
-    <PackageReference Include="Steeltoe.Connector.CloudFoundry" Version="4.0.100-alpha" />
+<!--    <PackageReference Include="Steeltoe.Connector.CloudFoundry" Version="4.0.100-alpha" />-->
     <PackageReference Include="Steeltoe.Common.Hosting" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Discovery.Eureka" Version="$(SteeltoeVersion)" />
+    <PackageReference Include="Steeltoe.Discovery.Configuration" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Configuration.CloudFoundry" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Configuration.ConfigServer" Version="$(SteeltoeVersion)" />
     <PackageReference Include="Steeltoe.Configuration.Kubernetes.ServiceBinding" Version="$(SteeltoeVersion)" />
@@ -86,7 +91,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
-    <None Update="appsettings.vcap_services.yaml">
+    <None Update="vcap_services.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>

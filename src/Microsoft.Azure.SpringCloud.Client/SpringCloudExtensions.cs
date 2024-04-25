@@ -14,7 +14,7 @@ using Microsoft.Extensions.Options;
 using Steeltoe.Common;
 using Steeltoe.Common.Options;
 using Steeltoe.Common.Security;
-using Steeltoe.Extensions.Configuration.Kubernetes.ServiceBinding;
+using Steeltoe.Configuration.Kubernetes.ServiceBinding;
 
 namespace Microsoft.Azure.SpringCloud.Client;
 

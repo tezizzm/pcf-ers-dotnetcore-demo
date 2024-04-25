@@ -1,0 +1,53 @@
+﻿---
+"$schema": https://raw.githubusercontent.com/steeltoeoss-incubator/steeltoe-schema/master/schema.json
+#vcap:
+#  services:
+p-identity:
+  - binding_guid: 4c6f01d6-0abd-4006-9a9c-44a83d61d4e7
+    binding_name:
+    credentials:
+      auth_domain: https://andrew.login.sys.longbeach.cf-app.com
+      client_id: 4c6f01d6-0abd-4006-9a9c-44a83d61d4e7
+      client_secret: c506f1be-1cc9-473d-9e61-c3f6b1c12dc8
+      grant_types:
+        - authorization_code
+    instance_guid: 93e22621-0c48-49f3-b674-66fef67642f3
+    instance_name: sso
+    label: p-identity
+    name: sso
+    plan: andrew
+    provider:
+    syslog_drain_url:
+    tags: [ ]
+    volume_mounts: [ ]
+p.service-registry:
+  - binding_name:
+    credentials:
+      uri: http://127.0.0.1:8761
+    instance_name: eureka
+    label: p.service-registry
+    name: eureka
+    plan: standard
+    provider:
+    syslog_drain_url:
+    tags:
+      - eureka
+      - discovery
+      - registry
+      - spring-cloud
+    volume_mounts: []
+
+p.config-server:
+  - binding_name:
+    credentials:
+      uri: http://127.0.0.1:8888
+    instance_name: config-server
+    label: p.config-server
+    name: config-server
+    plan: standard
+    provider:
+    syslog_drain_url:
+    tags:
+      - config-server
+      - spring-cloud
+    volume_mounts: []

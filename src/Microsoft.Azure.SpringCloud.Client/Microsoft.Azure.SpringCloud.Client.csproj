@@ -3,14 +3,14 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <OutputType>Library</OutputType>
-        <SteeltoeVersion>3.2.4</SteeltoeVersion>
+        <SteeltoeVersion>4.0.323-alpha</SteeltoeVersion>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
         <PackageReference Include="Steeltoe.Common" Version="$(SteeltoeVersion)" />
         <PackageReference Include="Steeltoe.Common.Security" Version="$(SteeltoeVersion)" />
-        <PackageReference Include="Steeltoe.Extensions.Configuration.Kubernetes.ServiceBinding" Version="$(SteeltoeVersion)" />
+        <PackageReference Include="Steeltoe.Configuration.Kubernetes.ServiceBinding" Version="$(SteeltoeVersion)" />
 
 
     </ItemGroup>

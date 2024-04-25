@@ -2,6 +2,7 @@ using CloudPlatformDemo.Utils;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Options;
 using Steeltoe.Common;
+using Steeltoe.Configuration;
 using Steeltoe.Extensions.Configuration;
 // using Steeltoe.CloudFoundry.Connector.App;
 using Service = CloudPlatformDemo.Utils.Service;

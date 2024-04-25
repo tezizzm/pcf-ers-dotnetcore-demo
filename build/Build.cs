@@ -17,7 +17,7 @@ using Nuke.Common.Tools.Git;
 using Nuke.Common.Tools.GitHub;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.NerdbankGitVersioning;
-using Nuke.Common.Tools.Tanzu;
+// using Nuke.Common.Tools.Tanzu;
 using Nuke.Common.Utilities.Collections;
 using Octokit;
 using Serilog;
@@ -49,7 +49,7 @@ partial class Build : NukeBuild
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
-    string Framework => "net6.0";
+    string Framework => "net8.0";
     [Parameter("GitHub personal access token with access to the repo")]
     string GitHubToken;
 
@@ -81,17 +81,17 @@ partial class Build : NukeBuild
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
-    Target TanzuDeploy => _ => _
-        .Executes(() =>
-        {
-            var output = TanzuTasks.TanzuAppsWorkloadApply(c => c
-                .SetLocalPath("../app")
-                .EnableTail()
-                .AddEnv("ENV1", "value")
-                .AddEnv("ENV2", "value")
-                .SetAppName("MyApp"));
-            output.EnsureOnlyStd();
-        });
+    // Target TanzuDeploy => _ => _
+    //     .Executes(() =>
+    //     {
+    //         var output = TanzuTasks.TanzuAppsWorkloadApply(c => c
+    //             .SetLocalPath("../app")
+    //             .EnableTail()
+    //             .AddEnv("ENV1", "value")
+    //             .AddEnv("ENV2", "value")
+    //             .SetAppName("MyApp"));
+    //         output.EnsureOnlyStd();
+    //     });
     Target Restore => _ => _
         .Description("Restore nuget packages")
         .Executes(() =>
@@ -135,7 +135,7 @@ partial class Build : NukeBuild
         .Executes(() =>
         {
             Directory.CreateDirectory(ArtifactsDirectory);
-            DeleteFile(ArtifactsDirectory / PackageZipName);
+            (ArtifactsDirectory / PackageZipName).DeleteFile();
             ZipFile.CreateFromDirectory(PublishDirectory, ArtifactsDirectory / PackageZipName);
             Log.Information(ArtifactsDirectory / PackageZipName);
         });

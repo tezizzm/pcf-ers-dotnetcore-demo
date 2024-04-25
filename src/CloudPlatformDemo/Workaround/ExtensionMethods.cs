@@ -32,6 +32,7 @@ public static class ExtensionMethods
             foreach (var profile in profiles)
             {
                 builder.AddYamlFile($"appsettings.{profile}.yaml", true, true);
+                builder.AddJsonFile($"appsettings.{profile}.json", true, true);
             }
         }
 
