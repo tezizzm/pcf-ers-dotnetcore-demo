@@ -37,7 +37,6 @@ public class SecurityController : Controller
     public async Task<string> CallMtlsService([FromServices]IHttpClientFactory httpFactory, [FromServices]IDiscoveryClient discoveryClient, CancellationToken cancellationToken = default)
     {
         var client = httpFactory.CreateClient();
-        Steeltoe.Discovery.Eureka.EurekaDiscoveryClient f;
         // var anotherAppName = discoveryClient.Applications.GetRegisteredApplications().FirstOrDefault(x => x.Name != _app.AppName);
         var serviceIds = await discoveryClient.GetServiceIdsAsync(cancellationToken);
         var anotherAppName = serviceIds.FirstOrDefault(x => x != _app.AppName);

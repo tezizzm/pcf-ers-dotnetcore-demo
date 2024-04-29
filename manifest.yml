@@ -1,10 +1,10 @@
 ---
 applications:
-- name: ers
+- name: cpdemo-blue
   memory: 384M
   instances: 1
   random-route: true
-  path: src\CloudPlatformDemo\bin\Debug\net6.0\linux-x64\publish\
+  path: src\CloudPlatformDemo\bin\Debug\net8.0\linux-x64\publish\
   buildpacks:
     - dotnet_core_buildpack
   services: []

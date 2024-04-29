@@ -34,6 +34,8 @@ using Steeltoe.Discovery;
 using Steeltoe.Connectors.EntityFrameworkCore.MySql;
 using Steeltoe.Connectors.EntityFrameworkCore.SqlServer;
 using Steeltoe.Connectors.EntityFrameworkCore.PostgreSql;
+using Steeltoe.Connectors.MySql;
+using Steeltoe.Connectors.SqlServer;
 // using Steeltoe.Discovery.Client;
 using Steeltoe.Discovery.Configuration;
 using Steeltoe.Management.Endpoint;
@@ -54,7 +56,6 @@ var logger = LoggerFactory.Create(c => c
     .CreateLogger<Program>();
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
-
 
 // when running locally, get config from <gitroot>/config folder
 // string configDir = "../config/";
@@ -179,11 +180,6 @@ builder.Configuration
 
 
 builder.AddAllActuators();
-
-
-
-
-
 services.AddDistributedTracing();
 
 //services.AddSpringBootAdminClient(); 
@@ -203,33 +199,32 @@ services.AddConfigServerHealthContributor();
 // {
 //     services.AddSqlServerHealthContributor(builder.Configuration);
 // }
-services.AddDbContext<AttendeeContext>((serviceProvider, db) =>
+if (envInfo.IsMySqlBound)
 {
-    if (envInfo.IsMySqlBound)
-    {
-        db.UseMySql(serviceProvider);
-        logger.LogInformation("Database Provider: MySQL");
-    }
-    else if (envInfo.IsSqlServerBound)
-    {
-        db.UseSqlServer(serviceProvider);
-        logger.LogInformation("Database Provider: SQL Server");
-
-    }
-    else
-    {
-        var dbFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "users.db");
-        db.UseSqlite($"DataSource={dbFile}");
-        logger.LogInformation("Database Provider: SQLite");
+    // services.AddMySql(builder.Configuration);
+    builder.AddMySql();
+    services.AddDbContext<AttendeeContext>((serviceProvider, db) => db.UseMySql(serviceProvider));
+    logger.LogInformation("Database Provider: MySQL");
+}
+else if (envInfo.IsSqlServerBound)
+{
+    services.AddSqlServer(builder.Configuration);
+    services.AddDbContext<AttendeeContext>((serviceProvider, db) => db.UseSqlServer(serviceProvider));
+    logger.LogInformation("Database Provider: SQL Server");
+}
+else
+{
+    var dbFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "users.db");
+    services.AddDbContext<AttendeeContext>(db => db.UseSqlite($"DataSource={dbFile}"));
+    logger.LogInformation("Database Provider: SQLite");
         
-    }
-});
-services.AddTask<MigrateDbContextTask<AttendeeContext>>(ServiceLifetime.Scoped);
+}
 
-services.AddTransient<SkipCertValidationHttpHandler>();
-services.AddTransient<SkipCertValidationHttpHandlerWithClientCerts>();
-var httpClientBuilder = services.AddHttpClient(Options.DefaultName)
-     .ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandlerWithClientCerts>();
+services.AddTask<MigrateDbContextTask<AttendeeContext>>(ServiceLifetime.Scoped);
+// services.AddTransient<SkipCertValidationHttpHandler>();
+// services.AddTransient<SkipCertValidationHttpHandlerWithClientCerts>();
+var httpClientBuilder = services.AddHttpClient(Options.DefaultName);
+      //.ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandlerWithClientCerts>();
 
 
 var config = builder.Configuration;
@@ -239,14 +234,14 @@ if (envInfo.IsEurekaBound)
     builder.Services.AddEurekaDiscoveryClient();
     httpClientBuilder.AddServiceDiscovery();
     // todo: should be easier to do this with v4 now
-    // if (Platform2.IsAzureSpringApps)
-    // {
-    //     services.AddHttpClient<EurekaDiscoveryClient>("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandlerWithClientCerts>();
-    // }
-    // else
-    // {
-    //     services.AddHttpClient<EurekaDiscoveryClient>("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandler>();
-    // }
+    if (Platform2.IsAzureSpringApps)
+    {
+        services.AddHttpClient("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandlerWithClientCerts>();
+    }
+    else
+    {
+        services.AddHttpClient("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandler>();
+    }
     services.PostConfigure<EurekaInstanceOptions>(c => // use for development to set instance ID and other things for simulated c2c communications
     {
         if (c.RegistrationMethod == "direct")
@@ -285,11 +280,11 @@ else
 
     
 
-if (builder.Environment.IsDevelopment())
-{
-    services.AddTransient<SimulatedClientCertInHeaderHttpHandler>();
-    httpClientBuilder.ConfigurePrimaryHttpMessageHandler<SimulatedClientCertInHeaderHttpHandler>();
-}
+// if (builder.Environment.IsDevelopment())
+// {
+//     services.AddTransient<SimulatedClientCertInHeaderHttpHandler>();
+//     httpClientBuilder.ConfigurePrimaryHttpMessageHandler<SimulatedClientCertInHeaderHttpHandler>();
+// }
 
 
 

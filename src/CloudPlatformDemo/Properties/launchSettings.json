@@ -44,7 +44,8 @@
         "VCAP__APPLICATION__NAME": "ers-blue",
         "SPRING__PROFILES__ACTIVE": "vcap_application,vcap_services",
         "Eureka__Instance__SecurePort": "5001",
-        "CF_INSTANCE_GUID": "123"
+        "CF_INSTANCE_GUID": "123",
+        "eureka:client:validate_certificates": "false"
       },
       "applicationUrl": "https://localhost:5001"
     },

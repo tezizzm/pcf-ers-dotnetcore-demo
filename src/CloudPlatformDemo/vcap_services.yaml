@@ -51,3 +51,25 @@ p.config-server:
       - config-server
       - spring-cloud
     volume_mounts: []
+    
+p.mysql:
+  - binding_guid: ebc82be7-3ada-49ad-88b7-18f12828188a
+    binding_name:
+    credentials:
+      hostname: localhost
+      jdbcUrl: jdbc:mysql://localhost:3306/service_instance_db?user=root&password=&
+      name: service_instance_db
+      password: 
+      port: 3306
+      uri: mysql://root@localhost:3306/service_instance_db?reconnect=true
+      username: root
+    instance_guid: 82e190a0-be30-4648-8f05-991cc7b34ffe
+    instance_name: mysql
+    label: p.mysql
+    name: mysql
+    plan: db-small
+    provider:
+    syslog_drain_url:
+    tags:
+      - mysql
+    volume_mounts: []
