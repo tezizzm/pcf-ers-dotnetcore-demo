@@ -73,8 +73,8 @@ public partial class Build
                 os = "linux";
             else
                 os = "osx";
-            // var tilt = ToolPathResolver.GetPackageExecutable($"Tilt.CommandLine.{os}-x64", "tilt" + (OperatingSystem.IsWindows() ? ".exe" : ""));
-            var tilt = ToolPathResolver.GetPathExecutable("tilt");
+
+            var tilt = NuGetToolPathResolver.GetPackageExecutable($"Tilt.CommandLine.{os}-x64", "tilt" + (OperatingSystem.IsWindows() ? ".exe" : ""));
             var tiltProcess = ProcessTasks.StartProcess(tilt, "up", 
                 workingDirectory: RootDirectory, 
                 environmentVariables: new Dictionary<string, string>(currentEnvVars)
@@ -108,14 +108,6 @@ public partial class Build
         public string Hostname => $"{Name}-{Space}-{Org}";
         public bool IsInternal { get; set; }
     }
-
-    Target CfDeployFull => _ => _
-        .DependsOn(CfLogin, CfTarget, CfDeploy)
-        .Executes(() =>
-        {
-            
-        });
-
 
     Target CfEnsureCurrentTarget => _ => _
         .After(CfTarget, Pack)
@@ -162,12 +154,8 @@ public partial class Build
             };
             Blue = Green;
             Blue.Name = $"{AppName}-blue";
-
-            Backend = Green;
-            Backend.Name = $"{AppName}-backend";
-            Backend.Domain = InternalDomain;
-            Backend.IsInternal = true;
-            Apps = new[] { Green, Blue, Backend };
+            
+            Apps = new[] { Green, Blue };
         });
     Target CfDeploy => _ => _
         .After(CfLogin, CfTarget)
@@ -225,43 +213,16 @@ public partial class Build
                 .EnableNoRoute()
                 .EnableNoStart()
                 .SetMemory("384M")
+                .SetBuildpack("dotnet_core_buildpack")
                 .SetPath(ArtifactsDirectory / PackageZipName)
                 .CombineWith(Apps,(push,app) =>
                 {
                     
                     push = push
                         .SetAppName(app.Name);
-                    if (app.IsInternal) // override start command as buildpack sets --urls flag which prevents us from binding to non standard ssl port
-                    {
-                        push = push.SetStartCommand($"cd ${{HOME}} && ASPNETCORE_URLS='http://0.0.0.0:8080;https://0.0.0.0:8443' && exec ./{AssemblyName}");
-                    }
+
                     return push;
                 }), degreeOfParallelism: 3);
-
-            // bind backend to both regular 8080 http port and 8443 which can be accessed directly by other apps bypassing gorouter
-            CloudFoundrySetEnv(c => c
-                .SetAppName(Backend.Name)
-                .SetEnvVarName("ASPNETCORE_URLS")
-                .SetEnvVarValue("http://0.0.0.0:8080;https://0.0.0.0:8443")); 
-            
-            CloudFoundrySetEnv(c => c
-                .SetAppName(Backend.Name)
-                .SetEnvVarName("SPRING__PROFILES__ACTIVE")
-                .SetEnvVarValue("Backend")); 
-            
-            // CloudFoundryPush(c => c
-            //     .SetAppName(backend)
-            //     .EnableNoRoute()
-            //     .EnableNoStart()
-            //     .SetPath(ArtifactsDirectory / PackageZipName)
-            //     .SetProcessEnvironmentVariable("ASPNETCORE_URLS", "http://0.0.0.0:8080;https://0.0.0.0:8443"));
-            
-
-            // CloudFoundryMapRoute(c => c
-            //     .SetDomain(defaultDomain)
-            //     .CombineWith(names, (cfg, app) => cfg
-            //         .SetAppName(app)
-            //         .SetHostname($"{app}-{CfSpace}-{CfOrg}"))); 
             
             CloudFoundryMapRoute(c => c
                 .CombineWith(Apps, (cf,app) => cf
@@ -270,12 +231,13 @@ public partial class Build
                     .SetHostname(app.Hostname))
                 , degreeOfParallelism: 3);
 
-            CloudFoundry($"add-network-policy {Green.Name} {Backend.Name} --port 8443 --protocol tcp"); // expose on ssl as well
-            CloudFoundry($"add-network-policy {Blue.Name} {Backend.Name} --port 8443 --protocol tcp"); // expose on ssl as well
-            
-            await CloudFoundryEnsureServiceReady("eureka");
-            await CloudFoundryEnsureServiceReady("mysql");
-            await CloudFoundryEnsureServiceReady("sso");
+
+            if (hasDiscovery)
+                await CloudFoundryEnsureServiceReady("eureka");
+            if(hasMySql)
+                await CloudFoundryEnsureServiceReady("mysql");
+            if(hasSso)
+                await CloudFoundryEnsureServiceReady("sso");
 
             
             CloudFoundryBindService(c => c

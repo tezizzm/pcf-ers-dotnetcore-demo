@@ -8,6 +8,9 @@ using Steeltoe.Common.Options;
 
 namespace CloudPlatformDemo.Workaround;
 
+/// <summary>
+/// Adds ability to distinguish by name
+/// </summary>
 public class  ClientCertificateHttpHandler2 : HttpClientHandler
 {
     private readonly SemaphoreSlim _lock = new (1);

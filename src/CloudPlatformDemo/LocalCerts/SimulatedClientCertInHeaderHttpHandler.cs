@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using Steeltoe.Common.Options;
 
-namespace CloudPlatformDemo;
+namespace CloudPlatformDemo.LocalCerts;
 
 /// <summary>
 /// Appends client certs as http header. This is normally done by GoRouter - this code is purely for simulating behavior locally

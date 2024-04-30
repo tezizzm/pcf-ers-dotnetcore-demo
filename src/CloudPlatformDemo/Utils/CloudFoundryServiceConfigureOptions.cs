@@ -1,5 +1,8 @@
 ﻿namespace CloudPlatformDemo.Utils;
 
+/// <summary>
+/// Reads VCAP_SERVICES from configuration and configures a typed <see cref="ServiceBindings"/> options class of all the service bindings for the app on Cloud Foundry 
+/// </summary>
 public class CloudFoundryServiceConfigureOptions : ServiceConfigureOptions
 {
     public CloudFoundryServiceConfigureOptions(IConfiguration configuration) : base(configuration, "vcap:services")

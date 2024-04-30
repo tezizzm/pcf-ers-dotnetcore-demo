@@ -2,6 +2,9 @@
 
 namespace CloudPlatformDemo.Utils;
 
+/// <summary>
+/// Provides a base class for configuring a typed options that represents services bound to the app. How this data maps into IConfiguration differs between platforms 
+/// </summary>
 public class ServiceConfigureOptions : IConfigureOptions<ServiceBindings>
 {
     protected readonly IConfiguration _configuration;

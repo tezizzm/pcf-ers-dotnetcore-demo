@@ -48,7 +48,7 @@ partial class Build : NukeBuild
     public static int Main () => Execute<Build>();
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+    readonly Configuration Configuration = Configuration.Debug;
     string Framework => "net8.0";
     [Parameter("GitHub personal access token with access to the repo")]
     string GitHubToken;
@@ -69,7 +69,7 @@ partial class Build : NukeBuild
     string PackageZipName => $"CloudPlatformDemo-{GitVersion.SemVer2}.zip";
 
     AppDeployment[] Apps;
-    AppDeployment Green, Blue, Backend;
+    AppDeployment Green, Blue;
 
     
     Target Clean => _ => _
@@ -77,21 +77,11 @@ partial class Build : NukeBuild
         .Description("Clean out bin/obj folders")
         .Executes(() =>
         {
-            SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-            EnsureCleanDirectory(ArtifactsDirectory);
+            SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
+            ArtifactsDirectory.CreateOrCleanDirectory();
         });
 
-    // Target TanzuDeploy => _ => _
-    //     .Executes(() =>
-    //     {
-    //         var output = TanzuTasks.TanzuAppsWorkloadApply(c => c
-    //             .SetLocalPath("../app")
-    //             .EnableTail()
-    //             .AddEnv("ENV1", "value")
-    //             .AddEnv("ENV2", "value")
-    //             .SetAppName("MyApp"));
-    //         output.EnsureOnlyStd();
-    //     });
+
     Target Restore => _ => _
         .Description("Restore nuget packages")
         .Executes(() =>
@@ -121,7 +111,7 @@ partial class Build : NukeBuild
             DotNetPublish(s => s
                 .SetProject(Solution)
                 .SetConfiguration(Configuration)
-                .SetRuntime("linux-x64")
+                .SetRuntime(Runtime)
                 .DisableSelfContained()
                 .SetAssemblyVersion(GitVersion.AssemblyVersion)
                 .SetFileVersion(GitVersion.AssemblyFileVersion)

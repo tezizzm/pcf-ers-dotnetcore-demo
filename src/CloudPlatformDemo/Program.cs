@@ -44,7 +44,6 @@ using Steeltoe.Security.Authentication.CloudFoundry;
 using Steeltoe.Discovery.Eureka;
 using Steeltoe.Discovery.Eureka.Configuration;
 using Steeltoe.Discovery.HttpClients;
-using Steeltoe.Extensions.Configuration;
 using Steeltoe.Management.Endpoint.Health;
 using Steeltoe.Management.Task;
 using ConfigurationBuilderExtensions = Steeltoe.Configuration.CloudFoundry.ServiceBinding.ConfigurationBuilderExtensions;
@@ -57,33 +56,30 @@ var logger = LoggerFactory.Create(c => c
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
-// when running locally, get config from <gitroot>/config folder
-// string configDir = "../config/";
-// var appName = typeof(Program).Assembly.GetName().Name;
 builder.Configuration
     .AddYamlFile("appsettings.yaml", false, true)
     .AddYamlFile($"appsettings.{builder.Environment.EnvironmentName}.yaml", true, true)
     .AddProfiles();
 if (Platform2.IsTanzuApplicationPlatform)
 {
+    logger.LogInformation("Adding Tanzu Application Platform bits");
     builder.Configuration.AddKubernetesServiceBindings();
-    // var info = builder.Configuration.GetSection("k8s:bindings").GetServiceInfos<EurekaServiceInfo>();
 }
 if (Platform2.IsAzureSpringApps)
 {
+    logger.LogInformation("Adding ASA bits");
     builder.AddAzureSpringApp();
-    builder.Services.AddEurekaDiscoveryClient();//.AddServiceDiscovery(builder.Configuration, c => c.UseEureka());
-    // these line is a hack for a bug that overrides use of ClientCertificateHttpHandler with one implemented in this demo. Should be backported into steeltoe
-    // builder.Services
-    //     .AddSingleton<IHttpClientHandlerProvider, TempFixHttpClientHandlerProvider>()
-    //     .AddSingleton<ClientCertificateHttpHandler2>();
+    builder.Services.AddEurekaDiscoveryClient();
+
 }
 if (Platform2.IsKubernetes)
 {
+    logger.LogInformation("Adding Kubernetes bits");
     services.ConfigureOptions(typeof(KubernetesServiceConfigureOptions));
 }
 if (Platform.IsCloudFoundry)
 {
+    logger.LogInformation("Adding Cloud Foundry bits");
     builder.Services.RegisterCloudFoundryApplicationInstanceInfo();
     if (Environment.GetEnvironmentVariable("VCAP_SERVICES") != null)
     {
@@ -99,26 +95,13 @@ if (Platform.IsCloudFoundry)
         .AddCloudFoundry()
         .AddCloudFoundryContainerIdentity();
 
-    // builder.Services.AddOptions<IApplicationInstanceInfo>().Configure<IConfiguration>((opt, global) =>
-    // {
-    //     
-    //     // opt.Name = global.ApplicationName;
-    //     // opt.Instance_Id = global.InstanceId;
-    // }); // a little hack to reregister ApplicationInstanceInfo as options vs singleton that steeltoe does by default. we only use a couple of properties from this class so no need to copy everything
-    // builder.UseCloudFoundryCertificateForInternalRoutes();
-
-    if (builder.Environment.IsDevelopment())
-    {
-        builder.UseDevCertificate();
-    }
-    
     services.AddCloudFoundryContainerIdentity();
     services.AddAuthentication((options) =>
         {
             options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = CloudFoundryDefaults.AuthenticationScheme;
         })
-        .AddCookie((options) =>
+        .AddCookie(options =>
         {
             options.AccessDeniedPath = new PathString("/Home/AccessDenied");
         })
@@ -189,19 +172,8 @@ services.AddScoped<AppEnv>();
 services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 services.AddConfigServerHealthContributor();
 
-//todo: investigate if health contributors are added when using EF 
-// if (envInfo.IsMySqlBound)
-// {
-//     services.AddHealthContributors(); 
-//     services.AddMySqlHealthContributor(builder.Configuration);
-// }
-// else if (envInfo.IsSqlServerBound)
-// {
-//     services.AddSqlServerHealthContributor(builder.Configuration);
-// }
 if (envInfo.IsMySqlBound)
 {
-    // services.AddMySql(builder.Configuration);
     builder.AddMySql();
     services.AddDbContext<AttendeeContext>((serviceProvider, db) => db.UseMySql(serviceProvider));
     logger.LogInformation("Database Provider: MySQL");
@@ -221,34 +193,23 @@ else
 }
 
 services.AddTask<MigrateDbContextTask<AttendeeContext>>(ServiceLifetime.Scoped);
-// services.AddTransient<SkipCertValidationHttpHandler>();
-// services.AddTransient<SkipCertValidationHttpHandlerWithClientCerts>();
 var httpClientBuilder = services.AddHttpClient(Options.DefaultName);
-      //.ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandlerWithClientCerts>();
 
-
-var config = builder.Configuration;
 if (envInfo.IsEurekaBound)
 {
-    // builder.Services.AddServiceDiscovery(builder.Configuration, c => c.UseEureka());
+    logger.LogInformation("Adding Eureka");
     builder.Services.AddEurekaDiscoveryClient();
     httpClientBuilder.AddServiceDiscovery();
-    // todo: should be easier to do this with v4 now
     if (Platform2.IsAzureSpringApps)
     {
-        services.AddHttpClient("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandlerWithClientCerts>();
+        logger.LogInformation("Configuring eureka to use client side certs with ASA");
+        services.AddTransient<ClientCertificateHttpHandler2>();
+        services.AddHttpClient("Eureka").ConfigurePrimaryHttpMessageHandler<ClientCertificateHttpHandler2>();
     }
     else
     {
-        services.AddHttpClient("Eureka").ConfigurePrimaryHttpMessageHandler<SkipCertValidationHttpHandler>();
+        services.AddHttpClient("Eureka").ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler());
     }
-    services.PostConfigure<EurekaInstanceOptions>(c => // use for development to set instance ID and other things for simulated c2c communications
-    {
-        if (c.RegistrationMethod == "direct")
-        {
-            config.Bind("Eureka:Instance", c);
-        }
-    });
 }
 
 else

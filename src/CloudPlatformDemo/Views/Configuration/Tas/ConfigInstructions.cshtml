@@ -12,6 +12,6 @@
     <ol>
        <li><code>application.yaml</code> - applicable to all apps</li>
        <li><code>APP_NAME.yaml</code> - configuration specific to an app matched on `Spring:Application:Name` config key
-       <li><code>APP_NAME-ENVIRONMENT.yaml</code> - an environment specific overrides values per app. Environment is controlled via `ASPNETCORE_ENVIRONMENT` environmental variable for .NET apps
+       <li><code>APP_NAME-ENVIRONMENT.yaml</code> - an environment specific overrides values per app. Environment is controlled via <code>ASPNETCORE_ENVIRONMENT</code> environmental variable for .NET apps
    </ol>
    Note that values from all these sources get combined, with more specific ones overriding values in less specific yaml files

@@ -20,10 +20,31 @@ p-identity:
     syslog_drain_url:
     tags: [ ]
     volume_mounts: [ ]
+#p.service-registry:
+#  - binding_name:
+#    credentials:
+#      uri: http://127.0.0.1:8761
+#    instance_name: eureka
+#    label: p.service-registry
+#    name: eureka
+#    plan: standard
+#    provider:
+#    syslog_drain_url:
+#    tags:
+#      - eureka
+#      - discovery
+#      - registry
+#      - spring-cloud
+#    volume_mounts: []
 p.service-registry:
-  - binding_name:
+  - binding_guid: 2e3ab65f-cc08-490d-a45b-b1346f29ac0b
+    binding_name:
     credentials:
-      uri: http://127.0.0.1:8761
+      access_token_uri: https://uaa.sys.dhaka.cf-app.com:443/oauth/token
+      client_id: registry-client-07535cea-c147-496f-8f59-8f3af2fa6283
+      client_secret: diq2v6h5jabb0
+      uri: https://service-registry-7623b93a-d443-4a2a-a857-da37f06b8e6a.apps.dhaka.cf-app.com
+    instance_guid: 7623b93a-d443-4a2a-a857-da37f06b8e6a
     instance_name: eureka
     label: p.service-registry
     name: eureka
@@ -36,7 +57,6 @@ p.service-registry:
       - registry
       - spring-cloud
     volume_mounts: []
-
 p.config-server:
   - binding_name:
     credentials:
