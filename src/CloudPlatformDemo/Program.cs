@@ -220,36 +220,6 @@ else
     services.AddSingleton<IDiscoveryClient, ConfigurationDiscoveryClient>();
 }
 
-
-// services.PostConfigure<CertificateOptions>(opt =>
-// {
-//     // if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows) && opt.Certificate != null)
-//     // {
-//         try
-//         {
-//             // work around bug when running on Windows
-//             opt.Certificate = new X509Certificate2(config.GetValue<string>("certificate"), (string)null, X509KeyStorageFlags.Exportable);
-//             //opt.Certificate = new X509Certificate2(opt.Certificate.Export(X509ContentType.Pkcs12));
-//         }
-//         catch (Exception)
-//         {
-//             // ignored
-//         }
-//     // }
-// });
-
-
-    
-
-// if (builder.Environment.IsDevelopment())
-// {
-//     services.AddTransient<SimulatedClientCertInHeaderHttpHandler>();
-//     httpClientBuilder.ConfigurePrimaryHttpMessageHandler<SimulatedClientCertInHeaderHttpHandler>();
-// }
-
-
-
-
 services
     .AddControllersWithViews()
     .AddRazorRuntimeCompilation();
@@ -272,5 +242,4 @@ app.MapControllerRoute(
         pattern: "{controller=Home}/{action=Index}/{id?}");
 app.EnsureMigrationOfContext<AttendeeContext>();
 
-var configValues = builder.Configuration.AsEnumerable().ToList();
 app.Run();

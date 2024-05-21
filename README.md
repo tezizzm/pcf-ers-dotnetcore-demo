@@ -50,12 +50,11 @@ All available targets are available by running `\build.ps1` with no args
 
 - `CfDeploy` - deploys to current TAS with the following features: 
 
-  - 3 copies of app `cpdemo-blue`, `cpdemo-green`, and `cpdemo-backend`. Blue/green will be assigned public routes via default domain, while `ers-backend` will be mapped to an internal (container-to-container) domain.
-  - Allow blue/green apps to talk c2c to `ers-backend` on port `8433`. `ers-backend` uses CF container identity cert for port 8433
+  - 2 copies of app `cpdemo-blue`, `cpdemo-green`, and `cpdemo-backend`. Blue/green will be assigned public routes via default domain
   - If available in marketplace, create and bind to all apps the following services: mysql, eureka, sso
-
+  
   Use this target to automate deployment of full demo to TAS
-
+  
 - `AsaDeploy` - deploys app to Azure Spring Apps Enterprise. If deployment name not specifies, deploys twice into `green` and `blue` deployments
 
 ## Tanzu Application Service
@@ -77,7 +76,14 @@ Basic cf push can be done as following. Note that it doesn't include all the ser
 cf push
 ```
 
+Alternatively if you don't want to use the helper build script you can do it using native command like this (requires .NET SDK to be installed)
 
+```
+dotnet publish -r linux-x64 --no-self-contained -c Debug
+cf push
+```
+
+The included manifest will push a single instance from the publish folder (`src/CloudPlatformDemo/bin/Debug/net8.0/linux-x64/publish`)
 
 
 ### SSO Demo
@@ -88,9 +94,9 @@ To demo SSO, you need to setup SSO plan to show up in marketplace. If you only h
 
 You can do a TAP style inner-loop workflow using provided Tilt configuration. Changes to local system are automatically synchronized to remote container by copying over delta files and restarting the process without doing a full "push", greatly speeding up the feedback cycle. First time always results in a full push
 
-Start by executing `build.ps1 --sync-trigger Source` to synchronize with remote instance whenever local source code changes.
+Start by executing `build.ps1 LiveSync --sync-trigger Source` to synchronize with remote instance whenever local source code changes.
 
-Alternatively, use  `build.ps1 --sync-trigger Build` to synchronize with remote instance whenever a local build is triggered
+Alternatively, use  `build.ps1 LiveSync --sync-trigger Build` to synchronize with remote instance whenever a local build is triggered
 
 ## Azure Spring Apps
 

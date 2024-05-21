@@ -15,7 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C11A3553-946
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution", "solution", "{7FD7898E-C2B1-41DE-8850-8A160A99F1DD}"
 	ProjectSection(SolutionItems) = preProject
-		docker-compose.yaml = docker-compose.yaml
 		manifest.yml = manifest.yml
 		nuget.config = nuget.config
 	EndProjectSection
