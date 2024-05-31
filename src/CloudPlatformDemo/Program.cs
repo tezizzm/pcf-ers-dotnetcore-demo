@@ -1,27 +1,19 @@
-﻿using System.Net.Security;
-using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.RegularExpressions;
-using Articulate;
-using CloudPlatformDemo;
+﻿using System.Reflection;
 using CloudPlatformDemo.Models;
 using CloudPlatformDemo.Repositories;
-using CloudPlatformDemo.Utils;
 using CloudPlatformDemo.Workaround;
+using EasyNetQ;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Connections;
-using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.Azure.SpringCloud.Client;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration.Memory;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
+using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 using Steeltoe.Common;
 using Steeltoe.Common.Discovery;
-using Steeltoe.Common.Hosting;
 using Steeltoe.Common.Logging;
-// using Steeltoe.Common.Http.Discovery;
 using Steeltoe.Configuration.CloudFoundry;
 using Steeltoe.Configuration.CloudFoundry.ServiceBinding;
 using Steeltoe.Configuration.ConfigServer;
@@ -29,12 +21,10 @@ using Steeltoe.Configuration.Kubernetes.ServiceBinding;
 using Steeltoe.Configuration.Placeholder;
 using Steeltoe.Configuration.RandomValue;
 using Steeltoe.Connectors.EntityFrameworkCore;
-using Steeltoe.Connectors.PostgreSql;
-using Steeltoe.Discovery;
 using Steeltoe.Connectors.EntityFrameworkCore.MySql;
 using Steeltoe.Connectors.EntityFrameworkCore.SqlServer;
-using Steeltoe.Connectors.EntityFrameworkCore.PostgreSql;
 using Steeltoe.Connectors.MySql;
+using Steeltoe.Connectors.RabbitMQ;
 using Steeltoe.Connectors.SqlServer;
 // using Steeltoe.Discovery.Client;
 using Steeltoe.Discovery.Configuration;
@@ -42,17 +32,17 @@ using Steeltoe.Management.Endpoint;
 using Steeltoe.Management.Tracing;
 using Steeltoe.Security.Authentication.CloudFoundry;
 using Steeltoe.Discovery.Eureka;
-using Steeltoe.Discovery.Eureka.Configuration;
 using Steeltoe.Discovery.HttpClients;
-using Steeltoe.Management.Endpoint.Health;
 using Steeltoe.Management.Task;
-using ConfigurationBuilderExtensions = Steeltoe.Configuration.CloudFoundry.ServiceBinding.ConfigurationBuilderExtensions;
-using LocalCertificateWriter = CloudPlatformDemo.LocalCerts.LocalCertificateWriter;
 
-var logger = LoggerFactory.Create(c => c
-    .AddSimpleConsole(f => f
-        .SingleLine = true))
-    .CreateLogger<Program>();
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console(theme: SystemConsoleTheme.Colored)
+    .CreateLogger();
+
+// var logger = LoggerFactory.Create(c => c
+//     .AddSimpleConsole(f => f
+//         .SingleLine = true))
+//     .CreateLogger<Program>();
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
@@ -62,24 +52,24 @@ builder.Configuration
     .AddProfiles();
 if (Platform2.IsTanzuApplicationPlatform)
 {
-    logger.LogInformation("Adding Tanzu Application Platform bits");
+    Log.Information("Adding Tanzu Application Platform bits");
     builder.Configuration.AddKubernetesServiceBindings();
 }
 if (Platform2.IsAzureSpringApps)
 {
-    logger.LogInformation("Adding ASA bits");
+    Log.Information("Adding ASA bits");
     builder.AddAzureSpringApp();
     builder.Services.AddEurekaDiscoveryClient();
 
 }
 if (Platform2.IsKubernetes)
 {
-    logger.LogInformation("Adding Kubernetes bits");
+    Log.Information("Adding Kubernetes bits");
     services.ConfigureOptions(typeof(KubernetesServiceConfigureOptions));
 }
 if (Platform.IsCloudFoundry)
 {
-    logger.LogInformation("Adding Cloud Foundry bits");
+    Log.Information("Adding Cloud Foundry bits");
     builder.Services.RegisterCloudFoundryApplicationInstanceInfo();
     if (Environment.GetEnvironmentVariable("VCAP_SERVICES") != null)
     {
@@ -147,7 +137,7 @@ if (envInfo.IsConfigServerBound)
 }
 else
 {
-    logger.LogWarning("Config server not being used as no binding information was present");
+    Log.Warning("Config server not being used as no binding information was present");
 }
 
 
@@ -172,23 +162,50 @@ services.AddScoped<AppEnv>();
 services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 services.AddConfigServerHealthContributor();
 
+if (envInfo.IsRabbitMqBound)
+{
+    builder.AddRabbitMQ();
+    builder.Services.RegisterEasyNetQ(svc =>
+    {
+        var connectionFactory = svc.Resolve<ConnectionFactory>();
+        var host = new HostConfiguration
+        {
+            Host = connectionFactory.HostName ?? connectionFactory.VirtualHost,
+            Port = (ushort)connectionFactory.Port
+        };
+        // use reflection cuz EasyNetQ made SSL property readonly and we don't wanna to copy all the fields one by one - just reflectively set the whole object to the backing field
+        var sslField = host.GetType().GetMembers(BindingFlags.NonPublic | BindingFlags.Instance).OfType<FieldInfo>().FirstOrDefault(x => x.FieldType == typeof(SslOption));
+        if (sslField != null)
+        {
+            sslField.SetValue(host, connectionFactory.Ssl);
+        }
+
+        return new ConnectionConfiguration
+        {
+            Hosts = new List<HostConfiguration> { host },
+            UserName = connectionFactory.UserName,
+            Password = connectionFactory.Password
+        };
+    });
+}
+
 if (envInfo.IsMySqlBound)
 {
     builder.AddMySql();
     services.AddDbContext<AttendeeContext>((serviceProvider, db) => db.UseMySql(serviceProvider));
-    logger.LogInformation("Database Provider: MySQL");
+    Log.Information("Database Provider: MySQL");
 }
 else if (envInfo.IsSqlServerBound)
 {
     services.AddSqlServer(builder.Configuration);
     services.AddDbContext<AttendeeContext>((serviceProvider, db) => db.UseSqlServer(serviceProvider));
-    logger.LogInformation("Database Provider: SQL Server");
+    Log.Information("Database Provider: SQL Server");
 }
 else
 {
     var dbFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "users.db");
     services.AddDbContext<AttendeeContext>(db => db.UseSqlite($"DataSource={dbFile}"));
-    logger.LogInformation("Database Provider: SQLite");
+    Log.Information("Database Provider: SQLite");
         
 }
 
@@ -197,12 +214,12 @@ var httpClientBuilder = services.AddHttpClient(Options.DefaultName);
 
 if (envInfo.IsEurekaBound)
 {
-    logger.LogInformation("Adding Eureka");
+    Log.Information("Adding Eureka");
     builder.Services.AddEurekaDiscoveryClient();
     httpClientBuilder.AddServiceDiscovery();
     if (Platform2.IsAzureSpringApps)
     {
-        logger.LogInformation("Configuring eureka to use client side certs with ASA");
+        Log.Information("Configuring eureka to use client side certs with ASA");
         services.AddTransient<ClientCertificateHttpHandler2>();
         services.AddHttpClient("Eureka").ConfigurePrimaryHttpMessageHandler<ClientCertificateHttpHandler2>();
     }
@@ -214,7 +231,7 @@ if (envInfo.IsEurekaBound)
 
 else
 {
-    logger.LogWarning("Service discovery (Eureka) integration disabled as no binding information was found. Discovery client will fall back to preconfigured " +
+    Log.Warning("Service discovery (Eureka) integration disabled as no binding information was found. Discovery client will fall back to preconfigured " +
                       "services found under 'Discovery:Services' configuration key");
     services.AddConfigurationDiscoveryClient();
     services.AddSingleton<IDiscoveryClient, ConfigurationDiscoveryClient>();

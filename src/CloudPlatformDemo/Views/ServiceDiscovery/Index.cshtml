@@ -16,16 +16,8 @@
 				
 				@if(! env.IsEurekaBound)
 				{
-					<p>To get this sample working you need to bind it to an instance of Eureka. Create eureka by following these steps: </p>
-					<ol>
-						<li>Confirm that Eureka is available by running <code>cf marketplace</code> and ensure that a serivce offering of type <code>p.service-registry</code> exists. 
-							If you don't see it offering, your administrator needs to install 
-							<a href="https://network.pivotal.io/products/p-spring-cloud-services/">Spring Cloud Services Tile</a> into TAS.</li>
-						<li>Create service: <code>cf create-service p.service-registry standard eureka</code>. This will take a few minutes.
-							<br/>You can confirm by checking status using <code>cf service mysql</code>.</li>
-						<li>Once service is provisioned, bind it to your app: <code>cf bind-service @_app.AppName eureka</code></li>
-						<li>Restart the app to make it pick up new service binding environmental variable: <code>cf restart  @_app.AppName</code></li>
-					</ol>
+					
+					<demofragment name="ServiceDiscoveryInstructions" />
 				}
 				else
 				{

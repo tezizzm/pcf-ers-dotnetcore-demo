@@ -255,15 +255,25 @@
 <div class="sidebar-heading">
     Demos
 </div>
-@if (Platform.IsCloudFoundry)
-{
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Services" asp-action="Index">
-            <i class="fas fa-fw fa-database"></i>
-            <span>Services</span>
-        </a>
-    </li>
-}
+
+<li class="nav-item">
+    <a class="nav-link" href="#" data-toggle="collapse" data-target="#services" aria-expanded="true" aria-controls="services">
+        <i class="fas fa-fw fa-cogs"></i>
+        <span>Services</span>
+    </a>
+    <div id="services" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+
+        
+        <div class="bg-white py-2 collapse-inner rounded">
+            <a class="collapse-item text-truncate" asp-controller="Services" asp-action="Database">Database</a>
+            <a class="collapse-item text-truncate" asp-controller="Services" asp-action="RabbitMq">RabbitMq</a>
+        </div>
+
+    </div>
+</li>
+
+
+
 @if (!Platform2.IsTanzuApplicationPlatform)
 {
     <li class="nav-item">

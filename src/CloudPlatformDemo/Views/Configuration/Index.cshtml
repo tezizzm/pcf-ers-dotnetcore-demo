@@ -5,9 +5,15 @@
         <h6 class="m-0 font-weight-bold text-primary">Configuration</h6>
     </div>
     <div class="card-body">
-        <p>Here you can view how different configuration sources get combined into .NET's comprehensive <code>IConfiguration</code> stack. </p>
-        <p>Pick individual configuration provider from dropdown to see which values it's contributing.</p>
-        <p><demofragment name="ConfigInstructions" /></p>
+
+        <div>
+            <img src="img/dotnet_configuration_stack.svg" alt=".NET Configuration stack" style="max-width: 20%;" class="float-right"/>
+            <p>Here you can view how different configuration sources get combined into .NET's comprehensive <code>IConfiguration</code> stack. Multiple configuration sources
+                can contribute to the final combined configuration view such as files, environmental variables, command line parameters, and others.</p>
+
+            <p>Pick individual configuration provider from dropdown to see which values it's contributing.</p>
+            <p><demofragment name="ConfigInstructions"/></p>
+        </div>
         <hr>
         <span>Configuration sources: </span>
         <select v-model="selected">

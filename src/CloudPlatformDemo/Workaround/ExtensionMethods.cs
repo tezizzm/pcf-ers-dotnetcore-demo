@@ -1,4 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
+using Serilog;
+
 // using Steeltoe.Connector.CloudFoundry;
 // using Steeltoe.Connector.Services;
 
@@ -8,13 +11,19 @@ public static class ExtensionMethods
 {
     public static void EnsureMigrationOfContext<T>(this IApplicationBuilder app) where T : DbContext
     {
-        var context = app.ApplicationServices.CreateScope().ServiceProvider.GetService<T>()!;
-        context.Database.Migrate();
+        try
+        {
+            var context = app.ApplicationServices.CreateScope().ServiceProvider.GetService<T>()!;
+            context.Database.Migrate();
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Unable to migrate database");
+        }
+
     }
 
-    // public static bool IsServiceBound<T>(this IConfiguration configuration) where T : class => CloudFoundryServiceInfoCreator.Instance(configuration).GetServiceInfos<T>().Any();
-    // public static bool IsServiceBound<T>(this IConfiguration configuration, string name) where T : class, IServiceInfo => CloudFoundryServiceInfoCreator.Instance(configuration).GetServiceInfos<T>().Any(x => x.Id == name);
-    //
+
     /// <summary>
     /// Similar to environment override, but allows more then one to be applied per app
     /// </summary>

@@ -6,9 +6,12 @@
             </div>
             <div class="card-body">
                 One of the features that Steeltoe provides are application actuators. Actuators are endpoints that expose useful internal telemetry from the app, and in some cases allow changing app's behavior without restarting.
-                The actuators are normally not exposed to the public as they often contained sensative information about app and it's environment, but are extremely useful for app monitoring and diagnostics.
+                The actuators are normally not exposed to the public as they often contained sensitive information about app and it's environment, but are extremely useful for app monitoring and diagnostics.
+                When running on cloud platforms, this endpoint is normally secured so that full details can only be viewed by the platform itself. For the purposes of this
+                demo, all actuators have been made visible to demonstrate what information is available.
                 
-                This application has been instrumented with actuators which you can browse on the `/actuator` endpoint. The following actuators are available, though some are not enabled for this app:
+                This application has been instrumented with actuators which you can browse on the <code>/actuator</code> endpoint. The following actuators are available, though some are not enabled for this app:
+                <demofragment name="Actuator"/>
                 <table class="table table-bordered table-striped table-condensed">
                 <thead>
                 <tr>
@@ -85,7 +88,7 @@
                 </tr>
                 </tbody>
                 </table>
-                <demofragment name="Actuator"/>
+                
             </div>
         </div>
     </div>

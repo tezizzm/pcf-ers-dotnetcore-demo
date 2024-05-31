@@ -47,7 +47,11 @@ public class DemoFragmentHelper : PartialTagHelper
             var platformSpecificViewExists = _viewEngine.GetView(ViewContext.ExecutingFilePath, $"{Name}.cshtml", false).Success;
             if (!platformSpecificViewExists)
                 Name = $"Generic/{originalName}";
-            await base.ProcessAsync(context, output);
+            var fallbackViewExists = _viewEngine.GetView(ViewContext.ExecutingFilePath, $"{Name}.cshtml", false).Success;
+            if (fallbackViewExists)
+            {
+                await base.ProcessAsync(context, output);
+            }
         }
         finally
         {

@@ -14,20 +14,7 @@
         </div>
     </div>
     <div class="card-body">
-        <p><platformname/> provides easy way to provision services such as databases, message brokers, etc from internal marketplace and attach (aka <i>bind</i>) them to your app. 
-        TAS will inject service specific information (such as db connection string) as part of <code>VCAP_SERVICES</code> environmental variable in JSON format. 
-        Steeltoe will help you not only parse this info, but automatically con configure objects in service container to be intialized and ready to go with this connection info. </p>
-        <p>In this example Steeltoe has configured Entity Framework DBContext to be initialized with the correct driver and connection string based on service binding. Click the tripple dot icon in 
-            top right to confirm current database connection information. If you haven't bound a real database, this sample defaults using SQLite database.</p>
-        <p>You can create a persistent MySQL database and bind it to this app to make this sample use that instead. Follow these steps in to do this: </p>
-        <ol>
-            <li>Confirm the MySQL service type and plan by running <code>cf marketplace</code>. If you don't see MySQL offering, your administrator needs to install 
-                <a href="https://network.pivotal.io/products/pivotal-mysql/">MySQL Tile</a> into TAS.</li>
-            <li>Create service: <code>cf create-service p.mysql db-small mysql</code>. This will take a few minutes to create as it's spinning up a dedicated MySQL VM. 
-                <br/>You can confirm by checking status using <code>cf service mysql</code>.</li>
-            <li>Once service is provisioned, bind it to your app: <code>cf bind-service  @_app.AppName mysql</code></li>
-            <li>Restart the app to make it pick up new service binding environmental variable: <code>cf restart @_app.AppName</code></li>
-        </ol>
+        
         <hr/>
         <div class="row">
             <div class="col-xl-3">

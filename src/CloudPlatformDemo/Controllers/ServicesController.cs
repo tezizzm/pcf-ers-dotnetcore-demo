@@ -14,7 +14,8 @@ public class ServicesController : Controller
         _db = db;
     }
 
-    public IActionResult Index() => View();
+    public IActionResult Database() => View();
+    public IActionResult RabbitMq() => View();
         
     [HttpPost]
     public async Task ClearUsers()
