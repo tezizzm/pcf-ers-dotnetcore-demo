@@ -1,14 +1,17 @@
 ﻿using System.Reflection;
 using CloudPlatformDemo.Models;
 using CloudPlatformDemo.Repositories;
+using CloudPlatformDemo.Services;
 using CloudPlatformDemo.Workaround;
 using EasyNetQ;
+using EasyNetQ.Serialization.SystemTextJson;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Azure.SpringCloud.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+using ReflectionMagic;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using Steeltoe.Common;
@@ -20,6 +23,7 @@ using Steeltoe.Configuration.ConfigServer;
 using Steeltoe.Configuration.Kubernetes.ServiceBinding;
 using Steeltoe.Configuration.Placeholder;
 using Steeltoe.Configuration.RandomValue;
+using Steeltoe.Connectors;
 using Steeltoe.Connectors.EntityFrameworkCore;
 using Steeltoe.Connectors.EntityFrameworkCore.MySql;
 using Steeltoe.Connectors.EntityFrameworkCore.SqlServer;
@@ -165,26 +169,25 @@ services.AddConfigServerHealthContributor();
 if (envInfo.IsRabbitMqBound)
 {
     builder.AddRabbitMQ();
+    builder.Services.AddSingleton<ISerializer, SystemTextJsonSerializer>();
     builder.Services.RegisterEasyNetQ(svc =>
     {
-        var connectionFactory = svc.Resolve<ConnectionFactory>();
+        var options = svc.Resolve<IOptions<RabbitMQOptions>>();
+        var connectionBuilder = Activator.CreateInstance(Type.GetType("Steeltoe.Connectors.RabbitMQ.RabbitMQConnectionStringBuilder, Steeltoe.Connectors")!).AsDynamic();
+        connectionBuilder.ConnectionString =  options.Value.ConnectionString;
+        
         var host = new HostConfiguration
         {
-            Host = connectionFactory.HostName ?? connectionFactory.VirtualHost,
-            Port = (ushort)connectionFactory.Port
+            Host = connectionBuilder["host"],
+            Port = ushort.Parse(connectionBuilder["port"])
         };
-        // use reflection cuz EasyNetQ made SSL property readonly and we don't wanna to copy all the fields one by one - just reflectively set the whole object to the backing field
-        var sslField = host.GetType().GetMembers(BindingFlags.NonPublic | BindingFlags.Instance).OfType<FieldInfo>().FirstOrDefault(x => x.FieldType == typeof(SslOption));
-        if (sslField != null)
-        {
-            sslField.SetValue(host, connectionFactory.Ssl);
-        }
+        host.AsDynamic().Ssl.Enabled = bool.Parse(connectionBuilder["useTls"]);
 
         return new ConnectionConfiguration
         {
             Hosts = new List<HostConfiguration> { host },
-            UserName = connectionFactory.UserName,
-            Password = connectionFactory.Password
+            UserName = connectionBuilder["username"],
+            Password = connectionBuilder["password"]
         };
     });
 }
@@ -203,8 +206,7 @@ else if (envInfo.IsSqlServerBound)
 }
 else
 {
-    var dbDir = Directory.Exists("/tmp") ? "/tmp" : Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-    var dbFile =  Path.Combine(dbDir, "users.db");
+    var dbFile =  Path.Combine(Path.GetTempPath(), "users.db");
     services.AddDbContext<AttendeeContext>(db => db.UseSqlite($"DataSource={dbFile}"));
     Log.Information("Database Provider: SQLite");
 }
@@ -241,6 +243,8 @@ services
     .AddControllersWithViews()
     .AddRazorRuntimeCompilation();
 
+services.AddSingleton<Chatroom>();
+
 var app = builder.Build();
 
 
@@ -253,6 +257,14 @@ app.UseRouting();
 app.UseCloudFoundryCertificateAuth();
 // app.UseAuthentication();
 // app.UseAuthorization();
+if (envInfo.IsRabbitMqBound)
+{
+    app.Use(async (context, next) =>
+    {
+        await context.RequestServices.GetRequiredService<Chatroom>().Connect();
+        await next();
+    });
+}
 
 app.MapControllerRoute(
         name: "default",

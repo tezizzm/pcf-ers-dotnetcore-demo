@@ -5,16 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CloudPlatformDemo.Controllers;
 
-public class ServicesController : Controller
+public class DatabaseController : Controller
 {
     private readonly AttendeeContext _db;
 
-    public ServicesController(AttendeeContext db)
+    public DatabaseController(AttendeeContext db)
     {
         _db = db;
     }
 
-    public IActionResult Database() => View();
+    public IActionResult Index() => View();
     public IActionResult RabbitMq() => View();
         
     [HttpPost]

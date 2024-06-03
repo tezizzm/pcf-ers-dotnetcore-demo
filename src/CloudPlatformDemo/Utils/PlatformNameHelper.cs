@@ -28,7 +28,7 @@ public class PlatformNameHelper : TagHelper
         }
         else if (Platform2.IsTanzuApplicationPlatform)
         {
-            platform = "Tanzu Application Platform";
+            platform = "Tanzu Platform";
         }
         else
         {

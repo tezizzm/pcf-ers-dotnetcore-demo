@@ -6,7 +6,7 @@ metadata:
 spec:
   build:
     buildpacks: {}
-    path: ..\..
+    path: ../..
     nonSecretEnv:
     - name: BP_DOTNET_PROJECT_PATH
       value: ./src/CloudPlatformDemo

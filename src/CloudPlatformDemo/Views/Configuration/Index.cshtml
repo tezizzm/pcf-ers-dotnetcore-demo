@@ -75,7 +75,7 @@ var pageModel = new Vue({
         },
         add: function () {
             var self = this;
-            var addUserUrl = "@Url.Action("AddUser","Services")";
+            var addUserUrl = "@Url.Action("AddUser","Database")";
             $.post(addUserUrl, this.user)
              .always(function () {
                 self.refresh();
@@ -84,11 +84,11 @@ var pageModel = new Vue({
         },
         clear: function () {
             var self = this;
-            var clearUrl = "@Url.Action("ClearUsers","Services")";
+            var clearUrl = "@Url.Action("ClearUsers","Database")";
             $.post(clearUrl, function () { self.refresh() });
         },
         refresh: function (){
-            var getUsers = "@Url.Action("GetUsers","Services")";
+            var getUsers = "@Url.Action("GetUsers","Database")";
             var self = this;
             $.get(getUsers, function (users) {
                   self.users = users;

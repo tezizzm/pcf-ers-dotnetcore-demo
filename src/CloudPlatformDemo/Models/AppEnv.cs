@@ -20,10 +20,10 @@ public class AppEnv
         ContainerAddress = $"{connectionContext.LocalIpAddress}:{connectionContext.LocalPort}";
         AppName = appInfo.ApplicationName ?? configuration.GetValue<string>("Spring:Application:Name");
         DeploymentName = configuration.GetValue<string>("AZURE_SPRING_APPS:DEPLOYMENT:NAME") ?? AppName;
-        InstanceName =  !string.IsNullOrEmpty(appInfo.InstanceId) ? appInfo.InstanceId : System.Environment.GetEnvironmentVariable("CF_INSTANCE_GUID");
+        InstanceName =  !string.IsNullOrEmpty(appInfo.InstanceId) ? appInfo.InstanceId : System.Environment.GetEnvironmentVariable("CF_INSTANCE_GUID") ?? System.Environment.GetEnvironmentVariable("HOSTNAME");
         Services = services.Value.Services.GroupBy(x => x.Type).ToDictionary(x => x.Key, x => x.ToList());
         ClrVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
-        HostAddress = System.Environment.GetEnvironmentVariable("CF_INSTANCE_ADDR") ?? "localhost";
+        HostAddress = System.Environment.GetEnvironmentVariable("CF_INSTANCE_ADDR") ?? System.Environment.GetEnvironmentVariable("KUBERNETES_SERVICE_HOST") ?? "localhost";
         Environment = environment.EnvironmentName;
         Profiles = configuration.GetValue<string>("spring:profiles:active");
     }

@@ -53,12 +53,12 @@
     }
     else if(Platform.IsCloudFoundry)
     {
-        icon = "~/img/icon-tanzu.svg";
+        icon = "~/img/icon-cloud-foundry.png";
         platformName = "TAS";
     }
     else if (Platform2.IsTanzuApplicationPlatform)
     {
-        icon = "~/img/icon-tanzu.svg";
+        icon = "~/img/icon-kubernetes.webp";
         platformName = "TAP";
     }
     else
@@ -81,7 +81,7 @@
             <div class="col-sm">
                 <img class="img-fluid" src="@Url.Content(icon)"/>
             </div>
-            <div class="col-sm sidebar-brand-text mx-3 sidebar-brand d-flex ">@platformName Demo</div>
+            <div class="col-sm sidebar-brand-text mx-3 sidebar-brand d-flex align-items-center justify-content-center">@platformName Demo</div>
         </div>
     </div>
 </a>
@@ -265,8 +265,8 @@
 
         
         <div class="bg-white py-2 collapse-inner rounded">
-            <a class="collapse-item text-truncate" asp-controller="Services" asp-action="Database">Database</a>
-            <a class="collapse-item text-truncate" asp-controller="Services" asp-action="RabbitMq">RabbitMq</a>
+            <a class="collapse-item text-truncate" asp-controller="Database" asp-action="Index">Database</a>
+            <a class="collapse-item text-truncate" asp-controller="RabbitMq" asp-action="Index">RabbitMq</a>
         </div>
 
     </div>

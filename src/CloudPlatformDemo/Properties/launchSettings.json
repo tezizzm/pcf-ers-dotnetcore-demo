@@ -19,6 +19,7 @@
       "environmentVariables": {
         "PLATFORM_NAME": "TanzuApplicationPlatform",
         "CNB_APP_DIR": ".",
+        "HOSTNAME": "cloud-platform-demo-75c8647f4b-6ldct",
         "SERVICE_BINDING_ROOT": "./Properties/LaunchProfiles/TAP/ServiceBindingsRoot"
       }
     },

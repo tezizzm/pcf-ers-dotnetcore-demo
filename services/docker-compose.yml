@@ -27,7 +27,12 @@ services:
       SPRING_PROFILES_ACTIVE: native
       ENCRYPTION_KEY: donotsharethiskey
     #env_file: config-server.env
-
+  rabbitmq:
+    image: 'rabbitmq:3-management'
+    ports:
+      - '8084:15672'
+      - '15672:15672'
+      - '5672:5672'
   eureka:
     image: steeltoeoss/eurekaserver
     ports:

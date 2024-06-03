@@ -15,8 +15,8 @@ public class EnvironmentInfo
     public bool IsContainerCertIdentityConfigured => IsCloudFoundry && _configuration.GetValue<string>("certificate") != null && _configuration["privateKey"] != null;
     //todo: figure out logic for if service is bound
     public bool IsSsoBound => _configuration.GetServiceBindings().IsServiceBound("SQLServer");
-    public bool IsMySqlBound => _configuration.GetServiceBindings().IsServiceBound("p.mysql");
-    public bool IsRabbitMqBound => _configuration.GetServiceBindings().IsServiceBound("p.rabbitmq");
+    public bool IsMySqlBound => _configuration.GetServiceBindings().IsServiceBound("p.mysql", "mysql");
+    public bool IsRabbitMqBound => _configuration.GetServiceBindings().IsServiceBound("p.rabbitmq", "rabbitmq");
     public bool IsEurekaBound => _configuration.GetServiceBindings().IsServiceBound("eureka","p.service-registry");
     public bool IsSqlServerBound => false;
     public bool IsConfigServerBound => _configuration
